@@ -26,9 +26,9 @@ Fixes #
 
 <!-- List the main changes made in this PR -->
 
-- 
-- 
-- 
+-
+-
+-
 
 ## Testing
 
@@ -43,9 +43,9 @@ Fixes #
 
 ### Test Environment
 
-- Python version: 
-- SQLAlchemy version: 
-- Database: 
+- Python version:
+- SQLAlchemy version:
+- Database:
 - Operating System:
 
 ## Code Quality

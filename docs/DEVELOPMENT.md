@@ -112,7 +112,7 @@ pytest tests/test_database.py
 # PostgreSQL (requires running instance)
 DB_URI="postgresql://user:pass@localhost/testdb" pytest tests/test_database.py
 
-# MySQL (requires running instance)  
+# MySQL (requires running instance)
 DB_URI="mysql://user:pass@localhost/testdb" pytest tests/test_database.py
 ```
 
@@ -130,7 +130,7 @@ DB_URI="mysql://user:pass@localhost/testdb" pytest tests/test_database.py
 
 - **Config**: Configuration management (TOML files)
 - **Snapshot**: Schema state capture and comparison
-- **Diff**: Change detection between snapshots  
+- **Diff**: Change detection between snapshots
 - **Migration**: SQL generation and file management
 - **Database**: Connection and migration state tracking
 - **CLI**: Command-line interface

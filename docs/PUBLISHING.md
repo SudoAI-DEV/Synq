@@ -6,7 +6,7 @@ This document describes how to publish the `synq-db` package to PyPI using GitHu
 
 The project uses GitHub Actions for automated publishing to PyPI with the following features:
 - **Trusted Publishing**: No API tokens needed, uses OpenID Connect
-- **Dual Publishing**: Publishes to both TestPyPI and PyPI  
+- **Dual Publishing**: Publishes to both TestPyPI and PyPI
 - **Tag-based Release**: Triggered by version tags (e.g., `v0.1.0`)
 - **Manual Trigger**: Can be manually triggered via GitHub UI
 
@@ -121,7 +121,7 @@ python -m twine upload dist/*
 
 The GitHub Actions workflow (`.github/workflows/release-publish.yml`) includes:
 
-- **Triggers**: 
+- **Triggers**:
   - Tag pushes (`v*`)
   - Manual workflow dispatch
 - **Test Job**: Runs full test suite before publishing
@@ -135,7 +135,7 @@ The GitHub Actions workflow (`.github/workflows/release-publish.yml`) includes:
 
 ### Common Issues
 
-1. **Package Name Conflicts**: 
+1. **Package Name Conflicts**:
    - The package name `synq-db` should be unique on PyPI
    - Check availability: https://pypi.org/project/synq-db/
 

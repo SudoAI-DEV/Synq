@@ -25,7 +25,7 @@ make test
 # or: pytest
 
 # Run tests with coverage (generates htmlcov/ directory)
-make test-cov  
+make test-cov
 # or: pytest --cov=synq --cov-report=html --cov-report=term
 
 # Run specific test file
@@ -44,7 +44,7 @@ make check-all
 make format
 # or: ruff format synq/ tests/ examples/ && ruff check --fix synq/ tests/ examples/
 
-# Run linting only  
+# Run linting only
 make lint
 # or: ruff check synq/ examples/ && mypy synq/
 ```
@@ -105,7 +105,7 @@ synq migrate -y
 **Commands**:
 - `init`: Initialize project structure and configuration
 - `generate`: Create new migration from schema changes
-- `migrate`: Apply pending migrations to database  
+- `migrate`: Apply pending migrations to database
 - `status`: Show migration status and pending changes
 
 ### Key Design Patterns
@@ -158,7 +158,7 @@ snapshot_dir = "migrations/meta"  # Optional: default shown
 ### Migration Workflow
 
 1. **Generate**: Compare current MetaData to latest snapshot, create migration files
-2. **Review**: Inspect generated SQL migration file  
+2. **Review**: Inspect generated SQL migration file
 3. **Apply**: Run migration against database with `synq migrate`
 4. **Track**: Migration state stored in database table for consistency
 

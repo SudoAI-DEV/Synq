@@ -20,7 +20,7 @@ from synq.core.snapshot import SnapshotManager
 class TestComprehensiveWorkflow:
     """Test complete Synq workflows end-to-end."""
 
-    @pytest.fixture
+    @pytest.fixture()
     def temp_project_dir(self):
         """Create a temporary project directory."""
         temp_dir = tempfile.mkdtemp()
@@ -231,7 +231,8 @@ class TestComprehensiveWorkflow:
 
             # Create a simple metadata module
             models_file = temp_project_dir / "models.py"
-            models_file.write_text("""
+            models_file.write_text(
+                """
 from sqlalchemy import MetaData, Table, Column, Integer, String
 
 metadata_obj = MetaData()
@@ -241,7 +242,8 @@ users_table = Table(
     Column("id", Integer, primary_key=True),
     Column("name", String(50)),
 )
-""")
+"""
+            )
 
             # Test init command
             with patch("builtins.input", return_value="models:metadata_obj"):
@@ -528,11 +530,11 @@ class TestEdgeCases:
 
         for input_name, expected in test_cases:
             result = namer._sanitize_name(input_name)
-            assert result == expected, (
-                f"Input: {input_name}, Expected: {expected}, Got: {result}"
-            )
+            assert (
+                result == expected
+            ), f"Input: {input_name}, Expected: {expected}, Got: {result}"
 
-    @pytest.fixture
+    @pytest.fixture()
     def temp_dir(self):
         """Create temporary directory."""
         temp_dir = tempfile.mkdtemp()

@@ -24,7 +24,7 @@ Synq can automatically generate intelligent migration names based on schema chan
 # Auto-generate name based on operations
 synq generate                    # → create_users_table, add_email_to_user, etc.
 
-# Use your own description  
+# Use your own description
 synq generate "Add user auth"    # → add_user_auth
 
 # Use custom name (overrides everything)

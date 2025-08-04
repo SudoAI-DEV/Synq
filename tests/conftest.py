@@ -10,7 +10,7 @@ from sqlalchemy import Column, Integer, MetaData, String, Table
 from synq.core.config import SynqConfig
 
 
-@pytest.fixture
+@pytest.fixture()
 def temp_dir():
     """Create a temporary directory for tests."""
     temp_path = Path(tempfile.mkdtemp())
@@ -18,7 +18,7 @@ def temp_dir():
     shutil.rmtree(temp_path)
 
 
-@pytest.fixture
+@pytest.fixture()
 def test_config(temp_dir):
     """Create a test configuration."""
     return SynqConfig(
@@ -29,7 +29,7 @@ def test_config(temp_dir):
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def test_metadata():
     """Create test SQLAlchemy metadata."""
     metadata = MetaData()
@@ -45,7 +45,7 @@ def test_metadata():
     return metadata
 
 
-@pytest.fixture
+@pytest.fixture()
 def modified_metadata():
     """Create modified test SQLAlchemy metadata."""
     metadata = MetaData()

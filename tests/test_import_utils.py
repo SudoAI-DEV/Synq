@@ -37,10 +37,12 @@ def test_import_metadata_from_path_success():
         module_file = temp_path / "test_module.py"
 
         # Write a test module with MetaData
-        module_file.write_text("""
+        module_file.write_text(
+            """
 from sqlalchemy import MetaData
 metadata_obj = MetaData()
-""")
+"""
+        )
 
         # Add temp directory to path
         original_path = sys.path[:]
@@ -119,10 +121,12 @@ def test_import_metadata_from_path_complex_module_path():
         (subpackage_dir / "__init__.py").write_text("")
 
         module_file = subpackage_dir / "models.py"
-        module_file.write_text("""
+        module_file.write_text(
+            """
 from sqlalchemy import MetaData
 metadata_obj = MetaData()
-""")
+"""
+        )
 
         # Add temp directory to path
         original_path = sys.path[:]

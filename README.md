@@ -46,7 +46,7 @@ pip install synq-db
 # With PostgreSQL support
 pip install synq-db[postgres]
 
-# With MySQL support  
+# With MySQL support
 pip install synq-db[mysql]
 
 # With all database drivers
@@ -93,23 +93,23 @@ metadata_obj = Base.metadata  # Reference for Synq
 
 class User(Base):
     __tablename__ = "users"
-    
+
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(String(50), unique=True)
     email: Mapped[str] = mapped_column(String(100), unique=True)
     created_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime, server_default=func.now()
     )
-    
+
     posts: Mapped[list["Post"]] = relationship("Post", back_populates="author")
 
 class Post(Base):
     __tablename__ = "posts"
-    
+
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(200))
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    
+
     author: Mapped["User"] = relationship("User", back_populates="posts")
 ```
 
@@ -158,7 +158,7 @@ Synq can automatically generate intelligent migration names, or you can provide 
 # Auto-generate name based on detected changes
 synq generate
 
-# Provide a custom description  
+# Provide a custom description
 synq generate "Create user and post tables"
 
 # Use a specific name (overrides auto-generation)
@@ -176,7 +176,7 @@ migrations/
 
 **Example generated migration names:**
 - `create_users_table` - Single table creation
-- `add_email_to_users` - Single column addition  
+- `add_email_to_users` - Single column addition
 - `initial_migration` - Multiple table creation
 - `update_schema` - Mixed operations across tables
 
@@ -225,7 +225,7 @@ synq generate
 # Provide custom description
 synq generate "Add user authentication"
 
-# Use specific name (overrides auto-generation)  
+# Use specific name (overrides auto-generation)
 synq generate --name "v2_auth_system"
 
 # Use custom config file

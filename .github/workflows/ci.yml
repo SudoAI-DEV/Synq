@@ -42,15 +42,15 @@ jobs:
     #   run: |
     #     # Test basic CLI functionality
     #     python -m synq --help
-        
+
     #     # Test init command
     #     mkdir test_project && cd test_project
     #     echo "from sqlalchemy import MetaData; metadata_obj = MetaData()" > models.py
     #     python -m synq init --metadata-path "models:metadata_obj" --db-uri "sqlite:///test.db"
-        
-    #     # Test generate command  
+
+    #     # Test generate command
     #     python -m synq generate "test migration"
-        
+
     #     # Verify files were created
     #     ls migrations/
     #     ls migrations/meta/
