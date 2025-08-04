@@ -288,3 +288,80 @@ class MigrationManager:
                 )
 
         return pending
+
+    def create_migration(
+        self,
+        operations: List[MigrationOperation],
+        metadata: MetaData,
+        migration_name: str = "",
+    ) -> Path:
+        """Create a new migration from operations."""
+        from synq.core.naming import generate_migration_name
+        from synq.core.snapshot import SnapshotManager
+
+        # Generate migration name if not provided
+        if not migration_name:
+            migration_name = generate_migration_name(operations)
+
+        # Get next migration number
+        snapshot_manager = SnapshotManager(self.config.snapshot_path)
+        migration_number = snapshot_manager.get_next_migration_number()
+
+        # Generate SQL
+        sql_content = self.generate_sql(operations, metadata)
+
+        # Clean migration name
+        clean_name = self.create_migration_name(migration_name)
+
+        # Save migration
+        return self.save_migration(migration_number, clean_name, sql_content)
+
+    def get_migration_by_number(self, number: int) -> Optional[MigrationFile]:
+        """Get a migration by its number."""
+        all_migrations = self.get_all_migrations()
+        for migration in all_migrations:
+            if migration.number == number:
+                return migration
+        return None
+
+    def validate_migration_sql(self, sql_content: str) -> bool:
+        """Validate migration SQL syntax."""
+        try:
+            # Basic validation - check if SQL is not empty and has valid structure
+            if not sql_content or not sql_content.strip():
+                return False
+
+            # Check for basic SQL keywords
+            sql_lower = sql_content.lower()
+            valid_keywords = ["create", "drop", "alter", "insert", "update", "delete"]
+
+            return any(keyword in sql_lower for keyword in valid_keywords)
+        except Exception:
+            return False
+
+    def _parse_migration_filename(self, filename: str) -> tuple[int, str]:
+        """Parse migration filename to extract number and name."""
+        stem = filename.removesuffix(".sql")
+        parts = stem.split("_", 1)
+
+        if len(parts) != 2:
+            raise ValueError(f"Invalid migration filename format: {filename}")
+
+        try:
+            number = int(parts[0])
+            name = parts[1]
+            return number, name
+        except ValueError as e:
+            raise ValueError(f"Invalid migration filename format: {filename}") from e
+
+    def _generate_sql_for_metadata(self, metadata: MetaData) -> List[str]:
+        """Generate SQL statements for metadata (for testing)."""
+        engine = create_engine("sqlite:///:memory:")
+        statements = []
+
+        for table in metadata.tables.values():
+            create_table = CreateTable(table)
+            sql = str(create_table.compile(engine)).strip() + ";"
+            statements.append(sql)
+
+        return statements

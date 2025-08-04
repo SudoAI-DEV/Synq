@@ -268,7 +268,7 @@ def test_migrate_command_successful():
                         migrate_command(
                             config_path=config_path,
                             dry_run=False,
-                            yes=False
+                            auto_confirm=False
                         )
                         
                         mock_echo.assert_any_call("🔍 Checking for pending migrations...")
@@ -305,7 +305,7 @@ def test_migrate_command_dry_run():
                     migrate_command(
                         config_path=config_path,
                         dry_run=True,
-                        yes=False
+                        auto_confirm=False
                     )
                     
                     mock_echo.assert_any_call("🏃‍♂️ Dry run mode - no changes will be applied")
@@ -507,7 +507,7 @@ def test_migrate_command_no_pending():
                     migrate_command(
                         config_path=config_path,
                         dry_run=False,
-                        yes=False
+                        auto_confirm=False
                     )
                     
                     mock_echo.assert_any_call("✅ No pending migrations. Database is up to date!")

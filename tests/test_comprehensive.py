@@ -6,6 +6,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+from sqlalchemy import Column, Integer, MetaData, String, Table
 
 from synq.cli.commands import generate, init
 from synq.core.config import SynqConfig
@@ -59,8 +60,8 @@ class TestComprehensiveWorkflow:
         """Test generating multiple migrations in sequence."""
         config = SynqConfig(
             metadata_path="test:metadata",
-            migrations_path=temp_project_dir / "migrations",
-            snapshot_path=temp_project_dir / "migrations" / "meta",
+            migrations_dir=str(temp_project_dir / "migrations"),
+            snapshot_dir=str(temp_project_dir / "migrations" / "meta"),
             db_uri="sqlite:///test.db",
         )
 
@@ -130,8 +131,8 @@ class TestComprehensiveWorkflow:
         """Test error handling in various scenarios."""
         config = SynqConfig(
             metadata_path="nonexistent.module:metadata",
-            migrations_path=temp_project_dir / "migrations",
-            snapshot_path=temp_project_dir / "migrations" / "meta",
+            migrations_dir=str(temp_project_dir / "migrations"),
+            snapshot_dir=str(temp_project_dir / "migrations" / "meta"),
             db_uri="invalid://database/url",
         )
 
@@ -272,8 +273,8 @@ users_table = Table(
         """Test detection of concurrent migrations."""
         config = SynqConfig(
             metadata_path="test:metadata",
-            migrations_path=temp_project_dir / "migrations",
-            snapshot_path=temp_project_dir / "migrations" / "meta",
+            migrations_dir=str(temp_project_dir / "migrations"),
+            snapshot_dir=str(temp_project_dir / "migrations" / "meta"),
             db_uri="sqlite:///test.db",
         )
 
@@ -301,8 +302,8 @@ users_table = Table(
         """Test schema validation and consistency checks."""
         config = SynqConfig(
             metadata_path="test:metadata",
-            migrations_path=temp_project_dir / "migrations",
-            snapshot_path=temp_project_dir / "migrations" / "meta",
+            migrations_dir=str(temp_project_dir / "migrations"),
+            snapshot_dir=str(temp_project_dir / "migrations" / "meta"),
             db_uri="sqlite:///test.db",
         )
 
@@ -361,8 +362,8 @@ users_table = Table(
         """Test migration dependency handling."""
         config = SynqConfig(
             metadata_path="test:metadata",
-            migrations_path=temp_project_dir / "migrations",
-            snapshot_path=temp_project_dir / "migrations" / "meta",
+            migrations_dir=str(temp_project_dir / "migrations"),
+            snapshot_dir=str(temp_project_dir / "migrations" / "meta"),
             db_uri="sqlite:///test.db",
         )
 
@@ -397,8 +398,8 @@ users_table = Table(
         """Test performance with large schema definitions."""
         config = SynqConfig(
             metadata_path="test:metadata",
-            migrations_path=temp_project_dir / "migrations",
-            snapshot_path=temp_project_dir / "migrations" / "meta",
+            migrations_dir=str(temp_project_dir / "migrations"),
+            snapshot_dir=str(temp_project_dir / "migrations" / "meta"),
             db_uri="sqlite:///test.db",
         )
 
@@ -455,8 +456,8 @@ class TestEdgeCases:
 
         config = SynqConfig(
             metadata_path="test:metadata",
-            migrations_path=temp_dir / "migrations",
-            snapshot_path=temp_dir / "migrations" / "meta",
+            migrations_dir=str(temp_dir / "migrations"),
+            snapshot_dir=str(temp_dir / "migrations" / "meta"),
         )
 
         snapshot_manager = SnapshotManager(config)
@@ -486,8 +487,8 @@ class TestEdgeCases:
 
         config = SynqConfig(
             metadata_path="test:metadata",
-            migrations_path=Path("migrations"),
-            snapshot_path=Path("migrations/meta"),
+            migrations_dir=str(Path("migrations")),
+            snapshot_dir=str(Path("migrations/meta")),
         )
 
         snapshot_manager = SnapshotManager(config)

@@ -67,3 +67,21 @@ def validate_metadata_object(metadata_obj: Any) -> None:
             f"Expected SQLAlchemy MetaData object, got {type(metadata_obj)}\n"
             "Make sure your metadata_path points to a MetaData instance."
         )
+
+
+def import_from_string(import_name: str) -> Any:
+    """
+    Import and return a module or object from a string.
+
+    Args:
+        import_name: String in format "module.path" or "module.path:object_name"
+
+    Returns:
+        The imported module or object
+    """
+    # If there's a colon, it's an object reference
+    if ":" in import_name:
+        return import_metadata_from_path(import_name)
+    else:
+        # Just import the module
+        return importlib.import_module(import_name)

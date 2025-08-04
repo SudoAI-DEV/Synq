@@ -54,11 +54,11 @@ def test_database_manager_get_applied_migrations():
     
     # Add a migration manually
     with db_manager.engine.connect() as conn:
-        conn.execute(
-            db_manager.migrations_table.insert(),
-            {"filename": "0001_initial.sql", "applied_at": datetime.utcnow()}
-        )
-        conn.commit()
+        with conn.begin():
+            conn.execute(
+                db_manager.migrations_table.insert(),
+                {"filename": "0001_initial.sql", "applied_at": datetime.utcnow()}
+            )
     
     # Should now return the migration
     applied = db_manager.get_applied_migrations()

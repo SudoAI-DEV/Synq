@@ -392,8 +392,8 @@ class TestPostgreSQLIntegration:
 
         config = SynqConfig(
             metadata_path="test:metadata",
-            migrations_path=temp_migration_dir / "migrations",
-            snapshot_path=temp_migration_dir / "migrations" / "meta",
+            migrations_dir=str(temp_migration_dir / "migrations"),
+            snapshot_dir=str(temp_migration_dir / "migrations" / "meta"),
             db_uri=db_uri,
         )
 

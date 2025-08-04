@@ -53,6 +53,14 @@ class DatabaseManager:
             except SQLAlchemyError:
                 raise RuntimeError(f"Failed to create or access migrations table: {e}")
 
+    def ensure_migrations_table(self) -> None:
+        """Public method to ensure the migrations tracking table exists."""
+        self._ensure_migrations_table()
+
+    def ensure_migration_table(self) -> None:
+        """Alias for ensure_migrations_table for backwards compatibility."""
+        self._ensure_migrations_table()
+
     def get_applied_migrations(self) -> List[str]:
         """Get list of applied migration filenames."""
         try:

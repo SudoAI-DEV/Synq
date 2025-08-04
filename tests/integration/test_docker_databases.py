@@ -466,8 +466,8 @@ class TestCrossDatabase:
         # Test with PostgreSQL
         pg_config = SynqConfig(
             metadata_path="test:metadata",
-            migrations_path=temp_migration_dir / "migrations_pg",
-            snapshot_path=temp_migration_dir / "migrations_pg" / "meta",
+            migrations_dir=str(temp_migration_dir / "migrations_pg"),
+            snapshot_dir=str(temp_migration_dir / "migrations_pg" / "meta"),
             db_uri=postgres_container["url"],
         )
 
@@ -486,8 +486,8 @@ class TestCrossDatabase:
         # Test with MySQL
         mysql_config = SynqConfig(
             metadata_path="test:metadata",
-            migrations_path=temp_migration_dir / "migrations_mysql",
-            snapshot_path=temp_migration_dir / "migrations_mysql" / "meta",
+            migrations_dir=str(temp_migration_dir / "migrations_mysql"),
+            snapshot_dir=str(temp_migration_dir / "migrations_mysql" / "meta"),
             db_uri=mysql_container["url"],
         )
 
