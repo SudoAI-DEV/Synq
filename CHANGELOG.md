@@ -34,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added comprehensive type hints throughout codebase
 - Improved test coverage to 85%+
 - Added integration tests with real database containers
-- Enhanced CI matrix testing across Python 3.8-3.13 and SQLAlchemy 1.4+/2.0+
+- Enhanced CI matrix testing across Python 3.9-3.13 and SQLAlchemy 1.4+/2.0+
 - Automated PyPI publishing workflow
 - Code quality gates with multiple linting tools
 

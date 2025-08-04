@@ -17,10 +17,9 @@ def init_command(
 
     # Check if already initialized
     config_path = Path.cwd() / "synq.toml"
-    if config_path.exists():
-        if not click.confirm(
-            f"Configuration file {config_path} already exists. Overwrite?"
-        ):
+    if config_path.exists() and not click.confirm(
+        f"Configuration file {config_path} already exists. Overwrite?"
+    ):
             click.echo("Initialization cancelled.")
             return
 
@@ -56,4 +55,4 @@ def init_command(
 
     except Exception as e:
         click.echo(f"❌ Error initializing Synq: {e}", err=True)
-        raise click.Abort()
+        raise click.Abort() from e

@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import toml
 
@@ -39,11 +39,11 @@ class SynqConfig:
                 snapshot_dir=synq_config.get("snapshot_dir", "migrations/meta"),
             )
         except KeyError as e:
-            raise ValueError(f"Missing required configuration key: {e}")
+            raise ValueError(f"Missing required configuration key: {e}") from e
         except Exception as e:
-            raise ValueError(f"Error parsing configuration file: {e}")
+            raise ValueError(f"Error parsing configuration file: {e}") from e
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert configuration to dictionary for TOML serialization."""
         result = {"metadata_path": self.metadata_path}
 

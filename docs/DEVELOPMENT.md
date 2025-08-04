@@ -4,7 +4,7 @@ This guide covers setting up Synq for development.
 
 ## Prerequisites
 
-- Python 3.8 or higher
+- Python 3.9 or higher
 - pip or uv for package management
 
 ## Setup

@@ -86,4 +86,4 @@ def generate_command(
 
     except Exception as e:
         click.echo(f"❌ Error generating migration: {e}", err=True)
-        raise click.Abort()
+        raise click.Abort() from e

@@ -264,7 +264,7 @@ Synq supports all databases that SQLAlchemy supports:
 
 ## Python & SQLAlchemy Support
 
-- **Python**: 3.8, 3.9, 3.10, 3.11, 3.12, 3.13
+- **Python**: 3.9, 3.10, 3.11, 3.12, 3.13
 - **SQLAlchemy**: 1.4+ and 2.0+
 - **Operating Systems**: Linux, macOS, Windows
 
