@@ -71,4 +71,4 @@ def status_command(config_path: Optional[Path]) -> None:
 
     except Exception as e:
         click.echo(f"❌ Error checking status: {e}", err=True)
-        raise click.Abort()
+        raise click.Abort() from e

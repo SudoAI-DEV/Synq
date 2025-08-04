@@ -36,18 +36,17 @@ def import_metadata_from_path(metadata_path: str) -> Any:
 
     try:
         module = importlib.import_module(module_path)
-        metadata_obj = getattr(module, object_name)
-        return metadata_obj
+        return getattr(module, object_name)
     except ImportError as e:
         raise ImportError(
             f"Could not import module '{module_path}': {e}\n"
             "Make sure the module exists and is in your Python path."
-        )
+        ) from e
     except AttributeError as e:
         raise AttributeError(
             f"Object '{object_name}' not found in module '{module_path}': {e}\n"
             "Make sure the object name is correct."
-        )
+        ) from e
 
 
 def validate_metadata_object(metadata_obj: Any) -> None:

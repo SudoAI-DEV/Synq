@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from synq.core.snapshot import (
     ColumnSnapshot,
@@ -69,7 +69,7 @@ class SchemaDiffer:
 
     def detect_changes(
         self, old_snapshot: Optional[SchemaSnapshot], new_snapshot: SchemaSnapshot
-    ) -> List[MigrationOperation]:
+    ) -> list[MigrationOperation]:
         """Detect changes between two snapshots."""
         if old_snapshot is None:
             # First migration - create all tables
@@ -115,7 +115,7 @@ class SchemaDiffer:
 
     def _create_initial_operations(
         self, snapshot: SchemaSnapshot
-    ) -> List[MigrationOperation]:
+    ) -> list[MigrationOperation]:
         """Create operations for initial migration."""
         operations = []
 
@@ -132,7 +132,7 @@ class SchemaDiffer:
 
     def _detect_table_changes(
         self, old_table: TableSnapshot, new_table: TableSnapshot
-    ) -> List[MigrationOperation]:
+    ) -> list[MigrationOperation]:
         """Detect changes within a single table."""
         operations = []
 
@@ -149,7 +149,7 @@ class SchemaDiffer:
 
     def _detect_column_changes(
         self, old_table: TableSnapshot, new_table: TableSnapshot
-    ) -> List[MigrationOperation]:
+    ) -> list[MigrationOperation]:
         """Detect column changes."""
         operations = []
 
@@ -201,7 +201,7 @@ class SchemaDiffer:
 
     def _detect_index_changes(
         self, old_table: TableSnapshot, new_table: TableSnapshot
-    ) -> List[MigrationOperation]:
+    ) -> list[MigrationOperation]:
         """Detect index changes."""
         operations = []
 
@@ -237,7 +237,7 @@ class SchemaDiffer:
 
     def _detect_foreign_key_changes(
         self, old_table: TableSnapshot, new_table: TableSnapshot
-    ) -> List[MigrationOperation]:
+    ) -> list[MigrationOperation]:
         """Detect foreign key changes."""
         operations = []
 
@@ -290,6 +290,6 @@ class SchemaDiffer:
 
     def generate_diff(
         self, old_snapshot: Optional[SchemaSnapshot], new_snapshot: SchemaSnapshot
-    ) -> List[MigrationOperation]:
+    ) -> list[MigrationOperation]:
         """Generate diff between snapshots (alias for detect_changes)."""
         return self.detect_changes(old_snapshot, new_snapshot)

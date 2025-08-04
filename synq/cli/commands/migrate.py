@@ -68,10 +68,10 @@ def migrate_command(
                 click.echo(f"❌ Failed to apply {migration.filename}: {e}", err=True)
                 click.echo("🔄 Rolling back transaction...")
                 db_manager.rollback()
-                raise click.Abort()
+                raise click.Abort() from e
 
         click.echo(f"🎉 Successfully applied {len(pending_migrations)} migration(s)!")
 
     except Exception as e:
         click.echo(f"❌ Error during migration: {e}", err=True)
-        raise click.Abort()
+        raise click.Abort() from e

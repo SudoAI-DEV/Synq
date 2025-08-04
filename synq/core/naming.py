@@ -2,7 +2,7 @@
 
 import re
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Set
+from typing import Optional
 
 from synq.core.diff import MigrationOperation, OperationType
 
@@ -11,9 +11,9 @@ from synq.core.diff import MigrationOperation, OperationType
 class NamingContext:
     """Context information for migration naming."""
 
-    operations: List[MigrationOperation]
-    table_names: Set[str]
-    operation_counts: Dict[OperationType, int]
+    operations: list[MigrationOperation]
+    table_names: set[str]
+    operation_counts: dict[OperationType, int]
 
 
 class MigrationNamer:
@@ -35,7 +35,7 @@ class MigrationNamer:
     def __init__(self):
         pass
 
-    def generate_name(self, operations: List[MigrationOperation]) -> str:
+    def generate_name(self, operations: list[MigrationOperation]) -> str:
         """
         Generate an intelligent migration name based on operations.
 
@@ -68,7 +68,7 @@ class MigrationNamer:
         return self._generate_multi_table_name(context)
 
     def _analyze_operations(
-        self, operations: List[MigrationOperation]
+        self, operations: list[MigrationOperation]
     ) -> NamingContext:
         """Analyze operations to extract naming context."""
         table_names = set()
@@ -216,7 +216,7 @@ class MigrationNamer:
 
 
 def generate_migration_name(
-    operations: List[MigrationOperation], user_description: Optional[str] = None
+    operations: list[MigrationOperation], user_description: Optional[str] = None
 ) -> str:
     """
     Generate a migration name based on operations and optional user description.

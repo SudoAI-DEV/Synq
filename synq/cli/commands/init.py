@@ -20,8 +20,8 @@ def init_command(
     if config_path.exists() and not click.confirm(
         f"Configuration file {config_path} already exists. Overwrite?"
     ):
-            click.echo("Initialization cancelled.")
-            return
+        click.echo("Initialization cancelled.")
+        return
 
     # Create configuration
     try:

@@ -3,7 +3,7 @@
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from sqlalchemy import MetaData, Table
 
@@ -26,7 +26,7 @@ class IndexSnapshot:
     """Snapshot of an index definition."""
 
     name: str
-    columns: List[str]
+    columns: list[str]
     unique: bool = False
 
 
@@ -35,9 +35,9 @@ class ForeignKeySnapshot:
     """Snapshot of a foreign key constraint."""
 
     name: Optional[str]
-    columns: List[str]
+    columns: list[str]
     referred_table: str
-    referred_columns: List[str]
+    referred_columns: list[str]
     ondelete: Optional[str] = None
     onupdate: Optional[str] = None
 
@@ -47,9 +47,9 @@ class TableSnapshot:
     """Snapshot of a table definition."""
 
     name: str
-    columns: List[ColumnSnapshot]
-    indexes: List[IndexSnapshot]
-    foreign_keys: List[ForeignKeySnapshot]
+    columns: list[ColumnSnapshot]
+    indexes: list[IndexSnapshot]
+    foreign_keys: list[ForeignKeySnapshot]
     schema: Optional[str] = None
 
 
@@ -57,15 +57,15 @@ class TableSnapshot:
 class SchemaSnapshot:
     """Complete schema snapshot."""
 
-    tables: List[TableSnapshot]
+    tables: list[TableSnapshot]
     version: str = "1.0"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert snapshot to dictionary for JSON serialization."""
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "SchemaSnapshot":
+    def from_dict(cls, data: dict[str, Any]) -> "SchemaSnapshot":
         """Create snapshot from dictionary."""
         tables = []
         for table_data in data["tables"]:
@@ -96,7 +96,7 @@ class SchemaSnapshot:
             return self.version
         raise KeyError(f"Key '{key}' not found in SchemaSnapshot")
 
-    def _table_to_dict(self, table: TableSnapshot) -> Dict[str, Any]:
+    def _table_to_dict(self, table: TableSnapshot) -> dict[str, Any]:
         """Convert a table to dictionary format for backward compatibility."""
         return {
             "name": table.name,
@@ -229,7 +229,7 @@ class SnapshotManager:
 
         return max_number + 1
 
-    def get_all_snapshots(self) -> List[int]:
+    def get_all_snapshots(self) -> list[int]:
         """Get all available snapshot numbers."""
         snapshot_files = list(self.snapshot_path.glob("*_snapshot.json"))
         numbers = []

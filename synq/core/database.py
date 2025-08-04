@@ -1,7 +1,6 @@
 """Database connection and migration state management."""
 
 from datetime import datetime, timezone
-from typing import List
 
 from sqlalchemy import (
     Column,
@@ -73,7 +72,7 @@ class DatabaseManager:
         """Alias for ensure_migrations_table for backwards compatibility."""
         self._ensure_migrations_table()
 
-    def get_applied_migrations(self) -> List[str]:
+    def get_applied_migrations(self) -> list[str]:
         """Get list of applied migration filenames."""
         try:
             with self.SessionClass() as session:

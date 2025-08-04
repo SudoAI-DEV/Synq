@@ -3,7 +3,7 @@
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, NamedTuple, Optional
+from typing import NamedTuple, Optional
 
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.schema import CreateTable
@@ -43,12 +43,12 @@ class MigrationManager:
 
     def detect_changes(
         self, old_snapshot: Optional[SchemaSnapshot], new_snapshot: SchemaSnapshot
-    ) -> List[MigrationOperation]:
+    ) -> list[MigrationOperation]:
         """Detect changes between snapshots."""
         return self.differ.detect_changes(old_snapshot, new_snapshot)
 
     def generate_sql(
-        self, operations: List[MigrationOperation], metadata: MetaData
+        self, operations: list[MigrationOperation], metadata: MetaData
     ) -> str:
         """Generate SQL from migration operations."""
         if not operations:
@@ -255,7 +255,7 @@ class MigrationManager:
 
         return filepath
 
-    def get_all_migrations(self) -> List[MigrationFile]:
+    def get_all_migrations(self) -> list[MigrationFile]:
         """Get all migration files."""
         migration_files = []
 
@@ -291,7 +291,7 @@ class MigrationManager:
 
         return migration_files
 
-    def get_pending_migrations(self, db_manager) -> List[PendingMigration]:
+    def get_pending_migrations(self, db_manager) -> list[PendingMigration]:
         """Get migrations that haven't been applied to the database."""
         all_migrations = self.get_all_migrations()
         applied_migrations = set(db_manager.get_applied_migrations())
@@ -312,7 +312,7 @@ class MigrationManager:
         metadata: MetaData,
         name: str = "",
         description: str = "",
-        operations: Optional[List[MigrationOperation]] = None,
+        operations: Optional[list[MigrationOperation]] = None,
     ) -> Path:
         """Create a new migration from operations."""
         from synq.core.naming import generate_migration_name
@@ -387,7 +387,7 @@ class MigrationManager:
         except ValueError:
             return None
 
-    def _generate_sql_for_metadata(self, metadata: MetaData) -> List[str]:
+    def _generate_sql_for_metadata(self, metadata: MetaData) -> list[str]:
         """Generate SQL statements for metadata (for testing)."""
         engine = create_engine("sqlite:///:memory:")
         statements = []
