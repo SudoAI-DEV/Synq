@@ -291,20 +291,30 @@ class MigrationManager:
 
     def create_migration(
         self,
-        operations: List[MigrationOperation],
         metadata: MetaData,
-        migration_name: str = "",
+        name: str = "",
+        description: str = "",
+        operations: Optional[List[MigrationOperation]] = None,
     ) -> Path:
         """Create a new migration from operations."""
         from synq.core.naming import generate_migration_name
         from synq.core.snapshot import SnapshotManager
 
+        # If no operations provided, detect changes from current metadata
+        if operations is None:
+            from synq.core.snapshot import SnapshotManager
+            snapshot_manager = SnapshotManager(self.config)
+            latest_snapshot = snapshot_manager.get_latest_snapshot()
+            current_snapshot = snapshot_manager.create_snapshot(metadata)
+            operations = self.detect_changes(latest_snapshot, current_snapshot)
+        
         # Generate migration name if not provided
+        migration_name = name or description
         if not migration_name:
             migration_name = generate_migration_name(operations)
 
         # Get next migration number
-        snapshot_manager = SnapshotManager(self.config.snapshot_path)
+        snapshot_manager = SnapshotManager(self.config)
         migration_number = snapshot_manager.get_next_migration_number()
 
         # Generate SQL

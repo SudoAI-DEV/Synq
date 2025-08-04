@@ -259,7 +259,7 @@ users_table = Table(
                 mock_import.return_value = metadata
 
                 generate.generate_command(
-                    description="Create users table", config=None, name=None
+                    description="Create users table", config_path=None, custom_name=None
                 )
 
             # Verify migration was created

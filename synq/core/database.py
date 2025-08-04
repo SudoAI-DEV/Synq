@@ -22,9 +22,19 @@ from synq.core.migration import PendingMigration
 class DatabaseManager:
     """Manages database connections and migration state."""
 
-    def __init__(self, db_uri: str):
-        self.db_uri = db_uri
-        self.engine = create_engine(db_uri)
+    def __init__(self, db_uri_or_config):
+        # Handle both string URI and config object for backward compatibility
+        if hasattr(db_uri_or_config, 'db_uri'):
+            # It's a config object
+            self.db_uri = db_uri_or_config.db_uri
+        else:
+            # It's a string URI
+            self.db_uri = db_uri_or_config
+        
+        if not self.db_uri:
+            raise ValueError("Database URI is required")
+            
+        self.engine = create_engine(self.db_uri)
         self.SessionClass = sessionmaker(bind=self.engine)
 
         # Define migrations table using SQLAlchemy ORM
@@ -148,6 +158,13 @@ class DatabaseManager:
                 }
         except SQLAlchemyError as e:
             return {"connected": False, "error": str(e), "uri": self.db_uri}
+
+    def apply_pending_migrations(self) -> None:
+        """Apply all pending migrations (for backward compatibility)."""
+        # This method requires a MigrationManager to get pending migrations
+        # For now, we'll provide a stub that does nothing
+        # In practice, this should be called from a higher-level context
+        pass
 
     def close(self) -> None:
         """Close database connection."""

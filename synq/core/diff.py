@@ -287,3 +287,7 @@ class SchemaDiffer:
             or old_col.autoincrement != new_col.autoincrement
             or old_col.unique != new_col.unique
         )
+    
+    def generate_diff(self, old_snapshot: Optional[SchemaSnapshot], new_snapshot: SchemaSnapshot) -> List[MigrationOperation]:
+        """Generate diff between snapshots (alias for detect_changes)."""
+        return self.detect_changes(old_snapshot, new_snapshot)

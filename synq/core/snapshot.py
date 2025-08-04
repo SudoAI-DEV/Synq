@@ -86,6 +86,26 @@ class SchemaSnapshot:
             )
 
         return cls(tables=tables, version=data.get("version", "1.0"))
+    
+    def __getitem__(self, key: str):
+        """Allow dictionary-style access for backward compatibility."""
+        if key == "tables":
+            # Return a dictionary with table names as keys
+            return {table.name: self._table_to_dict(table) for table in self.tables}
+        elif key == "version":
+            return self.version
+        else:
+            raise KeyError(f"Key '{key}' not found in SchemaSnapshot")
+    
+    def _table_to_dict(self, table: TableSnapshot) -> Dict[str, Any]:
+        """Convert a table to dictionary format for backward compatibility."""
+        return {
+            "name": table.name,
+            "columns": {col.name: asdict(col) for col in table.columns},
+            "indexes": [asdict(idx) for idx in table.indexes],
+            "foreign_keys": [asdict(fk) for fk in table.foreign_keys],
+            "schema": table.schema,
+        }
 
 
 class SnapshotManager:
