@@ -62,7 +62,9 @@ class DatabaseManager:
                 with self.engine.connect() as conn:
                     conn.execute(self.migrations_table.select().limit(1))
             except SQLAlchemyError as exc:
-                raise RuntimeError(f"Failed to create or access migrations table: {exc}") from exc
+                raise RuntimeError(
+                    f"Failed to create or access migrations table: {exc}"
+                ) from exc
 
     def ensure_migrations_table(self) -> None:
         """Public method to ensure the migrations tracking table exists."""
@@ -88,49 +90,47 @@ class DatabaseManager:
     def apply_migration(self, migration: PendingMigration) -> None:
         """Apply a single migration to the database."""
         with self.engine.connect() as conn, conn.begin() as trans:
-                try:
-                    # Execute migration SQL statements
-                    statements = [
-                        stmt.strip() for stmt in migration.sql_content.split(";")
-                    ]
+            try:
+                # Execute migration SQL statements
+                statements = [stmt.strip() for stmt in migration.sql_content.split(";")]
 
-                    for statement in statements:
-                        # Skip empty statements
-                        if not statement or not statement.strip():
-                            continue
+                for statement in statements:
+                    # Skip empty statements
+                    if not statement or not statement.strip():
+                        continue
 
-                        # Remove comments but keep SQL statements
-                        sql_lines = []
-                        for line in statement.split("\n"):
-                            line = line.strip()
-                            if line and not line.startswith("--"):
-                                sql_lines.append(line)
+                    # Remove comments but keep SQL statements
+                    sql_lines = []
+                    for line in statement.split("\n"):
+                        line = line.strip()
+                        if line and not line.startswith("--"):
+                            sql_lines.append(line)
 
-                        clean_statement = "\n".join(sql_lines).strip()
+                    clean_statement = "\n".join(sql_lines).strip()
 
-                        if not clean_statement:
-                            continue
+                    if not clean_statement:
+                        continue
 
-                        # Execute the statement
-                        conn.execute(text(clean_statement))
+                    # Execute the statement
+                    conn.execute(text(clean_statement))
 
-                    # Record migration as applied
-                    conn.execute(
-                        self.migrations_table.insert().values(
-                            filename=migration.filename,
-                            applied_at=datetime.now(timezone.utc),
-                        )
+                # Record migration as applied
+                conn.execute(
+                    self.migrations_table.insert().values(
+                        filename=migration.filename,
+                        applied_at=datetime.now(timezone.utc),
                     )
+                )
 
-                    # Explicitly commit the transaction
-                    trans.commit()
+                # Explicitly commit the transaction
+                trans.commit()
 
-                except Exception as e:
-                    # Explicitly rollback the transaction
-                    trans.rollback()
-                    raise RuntimeError(
-                        f"Failed to apply migration {migration.filename}: {e}"
-                    ) from e
+            except Exception as e:
+                # Explicitly rollback the transaction
+                trans.rollback()
+                raise RuntimeError(
+                    f"Failed to apply migration {migration.filename}: {e}"
+                ) from e
 
     def rollback(self) -> None:
         """Rollback current transaction (handled by context manager)."""

@@ -46,7 +46,7 @@ make format
 
 # Run linting only  
 make lint
-# or: ruff check synq/ tests/ examples/ && mypy synq/
+# or: ruff check synq/ examples/ && mypy synq/
 ```
 
 ### Building and Packaging

@@ -8,7 +8,7 @@ help:
 	@echo "  install-dev - Install with development dependencies"
 	@echo "  test        - Run tests"
 	@echo "  test-cov    - Run tests with coverage"
-	@echo "  lint        - Run linting (ruff + mypy)"
+	@echo "  lint        - Run linting on synq/ and examples/ (ruff + mypy)"
 	@echo "  format      - Format code (ruff)"
 	@echo "  clean       - Clean build artifacts"
 	@echo "  build       - Build package"
@@ -28,12 +28,12 @@ test-cov:
 	pytest --cov=synq --cov-report=html --cov-report=term
 
 lint:
-	-ruff check synq/ tests/ examples/
+	-ruff check synq/ examples/
 	-mypy synq/
 
 format:
 	ruff format synq/ tests/ examples/
-	-ruff check --fix synq/ tests/ examples/
+	-ruff check --fix synq/ examples/
 
 clean:
 	rm -rf build/

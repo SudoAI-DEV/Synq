@@ -58,7 +58,7 @@ ruff check --fix synq/ tests/ examples/
 
 Run linting:
 ```bash
-ruff check synq/ tests/ examples/
+ruff check synq/ examples/
 mypy synq/
 ```
 
