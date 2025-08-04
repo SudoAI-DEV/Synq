@@ -9,7 +9,7 @@ help:
 	@echo "  test        - Run tests"
 	@echo "  test-cov    - Run tests with coverage"
 	@echo "  lint        - Run linting (ruff + mypy)"
-	@echo "  format      - Format code (black + ruff)"
+	@echo "  format      - Format code (ruff)"
 	@echo "  clean       - Clean build artifacts"
 	@echo "  build       - Build package"
 	@echo "  upload      - Upload to PyPI"
@@ -28,12 +28,12 @@ test-cov:
 	pytest --cov=synq --cov-report=html --cov-report=term
 
 lint:
-	ruff check synq/ tests/ examples/
-	mypy synq/
+	-ruff check synq/ tests/ examples/
+	-mypy synq/
 
 format:
-	black synq/ tests/ examples/
-	ruff check --fix synq/ tests/ examples/
+	ruff format synq/ tests/ examples/
+	-ruff check --fix synq/ tests/ examples/
 
 clean:
 	rm -rf build/

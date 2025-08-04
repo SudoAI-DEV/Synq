@@ -281,10 +281,12 @@ class TestVersionSpecificBehavior:
         engine = create_engine(config.db_uri)
 
         # Should be able to execute the SQL
+        from sqlalchemy import text
+
         with engine.connect() as conn:
             if IS_SQLALCHEMY_2:
                 for stmt in sql_statements:
-                    conn.execute(stmt)
+                    conn.execute(text(stmt))
                 conn.commit()
             else:
                 for stmt in sql_statements:

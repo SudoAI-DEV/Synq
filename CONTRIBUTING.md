@@ -25,7 +25,7 @@ If you have an idea for a new feature or an improvement to an existing one, plea
     ```bash
     pytest
     ```
-5.  Format your code with a tool like Black or Ruff.
+5.  Format your code with Ruff.
 6.  Submit a pull request with a clear description of the changes.
 
 We look forward to your contributions!

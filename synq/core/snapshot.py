@@ -86,17 +86,16 @@ class SchemaSnapshot:
             )
 
         return cls(tables=tables, version=data.get("version", "1.0"))
-    
+
     def __getitem__(self, key: str):
         """Allow dictionary-style access for backward compatibility."""
         if key == "tables":
             # Return a dictionary with table names as keys
             return {table.name: self._table_to_dict(table) for table in self.tables}
-        elif key == "version":
+        if key == "version":
             return self.version
-        else:
-            raise KeyError(f"Key '{key}' not found in SchemaSnapshot")
-    
+        raise KeyError(f"Key '{key}' not found in SchemaSnapshot")
+
     def _table_to_dict(self, table: TableSnapshot) -> Dict[str, Any]:
         """Convert a table to dictionary format for backward compatibility."""
         return {
@@ -191,10 +190,13 @@ class SnapshotManager:
         if not filepath.exists():
             return None
 
-        with open(filepath) as f:
-            data = json.load(f)
-
-        return SchemaSnapshot.from_dict(data)
+        try:
+            with open(filepath) as f:
+                data = json.load(f)
+            return SchemaSnapshot.from_dict(data)
+        except (json.JSONDecodeError, KeyError, ValueError):
+            # Return None for malformed or invalid snapshot files
+            return None
 
     def get_latest_snapshot(self) -> Optional[SchemaSnapshot]:
         """Get the most recent snapshot."""

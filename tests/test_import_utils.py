@@ -35,17 +35,17 @@ def test_import_metadata_from_path_success():
     with TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
         module_file = temp_path / "test_module.py"
-        
+
         # Write a test module with MetaData
         module_file.write_text("""
 from sqlalchemy import MetaData
 metadata_obj = MetaData()
 """)
-        
+
         # Add temp directory to path
         original_path = sys.path[:]
         sys.path.insert(0, str(temp_path))
-        
+
         try:
             # Import should work
             metadata = import_metadata_from_path("test_module:metadata_obj")
@@ -57,13 +57,13 @@ metadata_obj = MetaData()
 
 def test_import_metadata_from_path_adds_current_dir():
     """Test that current directory is added to Python path."""
-    with patch('sys.path', []) as mock_path:  # Empty path list
-        with patch('importlib.import_module') as mock_import:
-            mock_module = type('Module', (), {'metadata_obj': MetaData()})()
+    with patch("sys.path", []) as mock_path:  # Empty path list
+        with patch("importlib.import_module") as mock_import:
+            mock_module = type("Module", (), {"metadata_obj": MetaData()})()
             mock_import.return_value = mock_module
-            
+
             result = import_metadata_from_path("test:metadata_obj")
-            
+
             # Should have added current directory to path
             assert len(mock_path) == 1
             assert isinstance(result, MetaData)
@@ -97,7 +97,7 @@ def test_validate_metadata_object_other_types():
         object(),
         "string",
     ]
-    
+
     for obj in invalid_objects:
         with pytest.raises(TypeError, match="Expected SQLAlchemy MetaData object"):
             validate_metadata_object(obj)
@@ -108,29 +108,31 @@ def test_import_metadata_from_path_complex_module_path():
     # Create a nested package structure
     with TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
-        
+
         # Create package structure
         package_dir = temp_path / "test_package"
         package_dir.mkdir()
         (package_dir / "__init__.py").write_text("")
-        
-        subpackage_dir = package_dir / "subpackage"  
+
+        subpackage_dir = package_dir / "subpackage"
         subpackage_dir.mkdir()
         (subpackage_dir / "__init__.py").write_text("")
-        
+
         module_file = subpackage_dir / "models.py"
         module_file.write_text("""
 from sqlalchemy import MetaData
 metadata_obj = MetaData()
 """)
-        
+
         # Add temp directory to path
         original_path = sys.path[:]
         sys.path.insert(0, str(temp_path))
-        
+
         try:
             # Import should work with complex path
-            metadata = import_metadata_from_path("test_package.subpackage.models:metadata_obj")
+            metadata = import_metadata_from_path(
+                "test_package.subpackage.models:metadata_obj"
+            )
             assert isinstance(metadata, MetaData)
         finally:
             # Restore original path
@@ -140,11 +142,11 @@ metadata_obj = MetaData()
 def test_import_metadata_from_path_current_dir_already_in_path():
     """Test that current directory path addition is skipped if already present."""
     current_dir = str(Path.cwd())
-    
-    with patch('importlib.import_module') as mock_import:
-        mock_module = type('Module', (), {'metadata_obj': MetaData()})()
+
+    with patch("importlib.import_module") as mock_import:
+        mock_module = type("Module", (), {"metadata_obj": MetaData()})()
         mock_import.return_value = mock_module
-        
+
         # Current directory should already be in path in normal circumstances
         result = import_metadata_from_path("test:metadata_obj")
         assert isinstance(result, MetaData)

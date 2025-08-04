@@ -136,8 +136,9 @@ def test_init_overwrite_existing(temp_dir):
 def test_generate_command_with_config(temp_dir):
     """Test generate command with valid config but import error."""
     from pathlib import Path
+
     import toml
-    
+
     runner = CliRunner()
 
     with runner.isolated_filesystem():
@@ -145,25 +146,25 @@ def test_generate_command_with_config(temp_dir):
         config_data = {
             "synq": {
                 "metadata_path": "nonexistent.module:metadata",
-                "db_uri": "sqlite:///test.db"
+                "db_uri": "sqlite:///test.db",
             }
         }
         with open("synq.toml", "w") as f:
             toml.dump(config_data, f)
-            
+
         # Create migrations directory
         Path("migrations/meta").mkdir(parents=True)
 
         result = runner.invoke(cli, ["generate", "Test migration"])
-        
+
         assert result.exit_code == 1  # Should fail due to import error
         assert "Error generating migration" in result.output
 
 
 def test_migrate_command_with_config(temp_dir):
-    """Test migrate command with valid config but no database."""
+    """Test migrate command with valid config but no migrations."""
     import toml
-    
+
     runner = CliRunner()
 
     with runner.isolated_filesystem():
@@ -171,22 +172,22 @@ def test_migrate_command_with_config(temp_dir):
         config_data = {
             "synq": {
                 "metadata_path": "test.module:metadata",
-                "db_uri": "sqlite:///nonexistent.db"
+                "db_uri": "sqlite:///nonexistent.db",
             }
         }
         with open("synq.toml", "w") as f:
             toml.dump(config_data, f)
 
         result = runner.invoke(cli, ["migrate"])
-        
-        assert result.exit_code == 1  # Should fail
-        assert "Error" in result.output
+
+        assert result.exit_code == 0  # Should succeed when no migrations
+        assert "No pending migrations" in result.output
 
 
 def test_status_command_with_config(temp_dir):
-    """Test status command with valid config but import error."""
+    """Test status command with valid config but no migrations."""
     import toml
-    
+
     runner = CliRunner()
 
     with runner.isolated_filesystem():
@@ -194,16 +195,16 @@ def test_status_command_with_config(temp_dir):
         config_data = {
             "synq": {
                 "metadata_path": "nonexistent.module:metadata",
-                "db_uri": "sqlite:///test.db"
+                "db_uri": "sqlite:///test.db",
             }
         }
         with open("synq.toml", "w") as f:
             toml.dump(config_data, f)
 
         result = runner.invoke(cli, ["status"])
-        
-        assert result.exit_code == 1  # Should fail due to import error
-        assert "Error" in result.output
+
+        assert result.exit_code == 0  # Should succeed when no migrations
+        assert "No migrations found" in result.output
 
 
 def test_generate_command_custom_config_path():
@@ -212,9 +213,9 @@ def test_generate_command_custom_config_path():
 
     with runner.isolated_filesystem():
         result = runner.invoke(cli, ["generate", "-c", "custom.toml", "Test"])
-        
-        assert result.exit_code == 1
-        assert "Configuration file not found" in result.output
+
+        assert result.exit_code == 2  # Click uses exit code 2 for argument errors
+        assert "does not exist" in result.output
 
 
 def test_migrate_command_dry_run():
@@ -223,7 +224,7 @@ def test_migrate_command_dry_run():
 
     with runner.isolated_filesystem():
         result = runner.invoke(cli, ["migrate", "--dry-run"])
-        
+
         assert result.exit_code == 1
         assert "Configuration file not found" in result.output
 
@@ -234,7 +235,7 @@ def test_migrate_command_auto_yes():
 
     with runner.isolated_filesystem():
         result = runner.invoke(cli, ["migrate", "-y"])
-        
+
         assert result.exit_code == 1
         assert "Configuration file not found" in result.output
 
@@ -245,6 +246,6 @@ def test_generate_command_with_name_option():
 
     with runner.isolated_filesystem():
         result = runner.invoke(cli, ["generate", "--name", "custom_migration"])
-        
+
         assert result.exit_code == 1
         assert "Configuration file not found" in result.output

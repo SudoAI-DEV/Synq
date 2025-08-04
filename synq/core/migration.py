@@ -55,8 +55,17 @@ class MigrationManager:
             return ""
 
         # Create a temporary engine for SQL compilation
-        # Using SQLite for cross-platform DDL generation
-        engine = create_engine("sqlite:///:memory:")
+        # Use target database if available, otherwise SQLite for compatibility
+        db_uri = getattr(self.config, "db_uri", None)
+        if db_uri and db_uri != "sqlite:///:memory:":
+            try:
+                # Use the actual database URI for proper SQL dialect generation
+                engine = create_engine(db_uri)
+            except Exception:
+                # Fall back to SQLite if target database unavailable
+                engine = create_engine("sqlite:///:memory:")
+        else:
+            engine = create_engine("sqlite:///:memory:")
 
         sql_statements = []
 
@@ -83,8 +92,16 @@ class MigrationManager:
 
         if operation.operation_type == OperationType.CREATE_TABLE:
             table_def = operation.new_definition
-            # Reconstruct SQLAlchemy table for DDL generation
-            table = self._build_sqlalchemy_table(table_def, metadata)
+            if table_def is None:
+                # Look up table from metadata
+                table = metadata.tables.get(operation.table_name)
+                if table is None:
+                    raise ValueError(
+                        f"Table {operation.table_name} not found in metadata"
+                    )
+            else:
+                # Reconstruct SQLAlchemy table for DDL generation
+                table = self._build_sqlalchemy_table(table_def, metadata)
             create_table = CreateTable(table)
             return str(create_table.compile(engine)).strip() + ";"
 
@@ -159,7 +176,7 @@ class MigrationManager:
 
     def _build_sqlalchemy_table(self, table_def, metadata):
         """Build SQLAlchemy Table from TableSnapshot for DDL generation."""
-        from sqlalchemy import Boolean, Column, DateTime, Integer, String, Table, Text
+        from sqlalchemy import TIMESTAMP, Boolean, Column, Integer, String, Table, Text
 
         # Create a new metadata instance to avoid conflicts
         temp_metadata = MetaData()
@@ -170,7 +187,8 @@ class MigrationManager:
             "VARCHAR": String,
             "TEXT": Text,
             "BOOLEAN": Boolean,
-            "DATETIME": DateTime,
+            "DATETIME": TIMESTAMP,  # Use TIMESTAMP for better database compatibility
+            "TIMESTAMP": TIMESTAMP,
         }
 
         columns = []
@@ -303,11 +321,12 @@ class MigrationManager:
         # If no operations provided, detect changes from current metadata
         if operations is None:
             from synq.core.snapshot import SnapshotManager
+
             snapshot_manager = SnapshotManager(self.config)
             latest_snapshot = snapshot_manager.get_latest_snapshot()
             current_snapshot = snapshot_manager.create_snapshot(metadata)
             operations = self.detect_changes(latest_snapshot, current_snapshot)
-        
+
         # Generate migration name if not provided
         migration_name = name or description
         if not migration_name:
@@ -322,6 +341,10 @@ class MigrationManager:
 
         # Clean migration name
         clean_name = self.create_migration_name(migration_name)
+
+        # Create and save new snapshot
+        current_snapshot = snapshot_manager.create_snapshot(metadata)
+        snapshot_manager.save_snapshot(migration_number, current_snapshot)
 
         # Save migration
         return self.save_migration(migration_number, clean_name, sql_content)
@@ -355,14 +378,14 @@ class MigrationManager:
         parts = stem.split("_", 1)
 
         if len(parts) != 2:
-            raise ValueError(f"Invalid migration filename format: {filename}")
+            return None
 
         try:
             number = int(parts[0])
             name = parts[1]
             return number, name
-        except ValueError as e:
-            raise ValueError(f"Invalid migration filename format: {filename}") from e
+        except ValueError:
+            return None
 
     def _generate_sql_for_metadata(self, metadata: MetaData) -> List[str]:
         """Generate SQL statements for metadata (for testing)."""

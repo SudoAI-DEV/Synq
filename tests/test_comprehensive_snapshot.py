@@ -1,10 +1,8 @@
 """Comprehensive tests for snapshot functionality."""
 
-import json
 import tempfile
 from pathlib import Path
 
-import pytest
 from sqlalchemy import (
     Boolean,
     Column,
@@ -91,7 +89,10 @@ def test_table_snapshot_creation():
     indexes = [IndexSnapshot(name="idx_name", columns=["name"], unique=False)]
     foreign_keys = [
         ForeignKeySnapshot(
-            name="fk_user", columns=["user_id"], referred_table="users", referred_columns=["id"]
+            name="fk_user",
+            columns=["user_id"],
+            referred_table="users",
+            referred_columns=["id"],
         )
     ]
 
@@ -115,7 +116,11 @@ def test_schema_snapshot_creation():
     tables = [
         TableSnapshot(
             name="users",
-            columns=[ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True)],
+            columns=[
+                ColumnSnapshot(
+                    name="id", type="INTEGER", nullable=False, primary_key=True
+                )
+            ],
             indexes=[],
             foreign_keys=[],
         )
@@ -132,7 +137,11 @@ def test_schema_snapshot_to_dict():
     tables = [
         TableSnapshot(
             name="users",
-            columns=[ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True)],
+            columns=[
+                ColumnSnapshot(
+                    name="id", type="INTEGER", nullable=False, primary_key=True
+                )
+            ],
             indexes=[],
             foreign_keys=[],
         )
@@ -237,7 +246,7 @@ def test_snapshot_manager_create_snapshot_complex():
 
         # Create complex metadata
         metadata = MetaData()
-        
+
         users_table = Table(
             "users",
             metadata,
@@ -264,18 +273,18 @@ def test_snapshot_manager_create_snapshot_complex():
         snapshot = manager.create_snapshot(metadata)
 
         assert len(snapshot.tables) == 2
-        
+
         # Find users table
         users_snapshot = next(t for t in snapshot.tables if t.name == "users")
         assert len(users_snapshot.columns) == 4
         assert len(users_snapshot.indexes) >= 1  # At least the email index
-        
+
         # Find posts table
         posts_snapshot = next(t for t in snapshot.tables if t.name == "posts")
         assert len(posts_snapshot.columns) == 4
         assert len(posts_snapshot.foreign_keys) == 1
         assert len(posts_snapshot.indexes) >= 2  # title and user_id indexes
-        
+
         # Check foreign key details
         fk = posts_snapshot.foreign_keys[0]
         assert fk.referred_table == "users"
@@ -297,7 +306,11 @@ def test_snapshot_manager_save_and_load_snapshot():
         tables = [
             TableSnapshot(
                 name="test_table",
-                columns=[ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True)],
+                columns=[
+                    ColumnSnapshot(
+                        name="id", type="INTEGER", nullable=False, primary_key=True
+                    )
+                ],
                 indexes=[],
                 foreign_keys=[],
             )
@@ -436,7 +449,9 @@ def test_snapshot_manager_get_all_snapshots_with_invalid_files():
         # Create invalid files
         (manager.snapshot_path / "invalid_snapshot.json").write_text("{}")
         (manager.snapshot_path / "not_a_number_snapshot.json").write_text("{}")
-        (manager.snapshot_path / "0002_valid_snapshot.json").write_text('{"tables": [], "version": "1.0"}')
+        (manager.snapshot_path / "0002_valid_snapshot.json").write_text(
+            '{"tables": [], "version": "1.0"}'
+        )
 
         # Should only return valid numbered snapshots
         all_snapshots = manager.get_all_snapshots()
@@ -464,7 +479,7 @@ def test_create_table_snapshot_with_schema():
         )
 
         table_snapshot = manager._create_table_snapshot(table)
-        
+
         assert table_snapshot.name == "test_table"
         assert table_snapshot.schema == "public"
 
@@ -492,14 +507,14 @@ def test_snapshot_with_constraints():
         )
 
         snapshot = manager.create_snapshot(metadata)
-        
+
         assert len(snapshot.tables) == 1
         table_snapshot = snapshot.tables[0]
-        
+
         # Check unique column
         email_col = next(c for c in table_snapshot.columns if c.name == "email")
         assert email_col.unique is True
-        
+
         # Check nullable column
         name_col = next(c for c in table_snapshot.columns if c.name == "name")
         assert name_col.nullable is False

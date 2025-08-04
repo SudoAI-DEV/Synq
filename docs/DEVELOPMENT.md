@@ -52,7 +52,7 @@ pytest tests/test_config.py
 
 Format code:
 ```bash
-black synq/ tests/ examples/
+ruff format synq/ tests/ examples/
 ruff check --fix synq/ tests/ examples/
 ```
 

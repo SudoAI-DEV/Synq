@@ -1,7 +1,5 @@
 """Comprehensive tests for schema diff functionality."""
 
-import pytest
-
 from synq.core.diff import MigrationOperation, OperationType, SchemaDiffer
 from synq.core.snapshot import (
     ColumnSnapshot,
@@ -29,23 +27,17 @@ def test_migration_operation_string_representation():
     """Test string representation of MigrationOperation."""
     # CREATE TABLE
     op = MigrationOperation(
-        operation_type=OperationType.CREATE_TABLE,
-        table_name="users"
+        operation_type=OperationType.CREATE_TABLE, table_name="users"
     )
     assert str(op) == "CREATE TABLE users"
 
     # DROP TABLE
-    op = MigrationOperation(
-        operation_type=OperationType.DROP_TABLE,
-        table_name="users"
-    )
+    op = MigrationOperation(operation_type=OperationType.DROP_TABLE, table_name="users")
     assert str(op) == "DROP TABLE users"
 
     # ADD COLUMN
     op = MigrationOperation(
-        operation_type=OperationType.ADD_COLUMN,
-        table_name="users",
-        object_name="email"
+        operation_type=OperationType.ADD_COLUMN, table_name="users", object_name="email"
     )
     assert str(op) == "ADD COLUMN users.email"
 
@@ -53,7 +45,7 @@ def test_migration_operation_string_representation():
     op = MigrationOperation(
         operation_type=OperationType.DROP_COLUMN,
         table_name="users",
-        object_name="email"
+        object_name="email",
     )
     assert str(op) == "DROP COLUMN users.email"
 
@@ -61,7 +53,7 @@ def test_migration_operation_string_representation():
     op = MigrationOperation(
         operation_type=OperationType.ALTER_COLUMN,
         table_name="users",
-        object_name="email"
+        object_name="email",
     )
     assert str(op) == "ALTER COLUMN users.email"
 
@@ -69,7 +61,7 @@ def test_migration_operation_string_representation():
     op = MigrationOperation(
         operation_type=OperationType.CREATE_INDEX,
         table_name="users",
-        object_name="idx_email"
+        object_name="idx_email",
     )
     assert str(op) == "CREATE INDEX idx_email ON users"
 
@@ -77,7 +69,7 @@ def test_migration_operation_string_representation():
     op = MigrationOperation(
         operation_type=OperationType.DROP_INDEX,
         table_name="users",
-        object_name="idx_email"
+        object_name="idx_email",
     )
     assert str(op) == "DROP INDEX idx_email"
 
@@ -85,7 +77,7 @@ def test_migration_operation_string_representation():
     op = MigrationOperation(
         operation_type=OperationType.ADD_FOREIGN_KEY,
         table_name="posts",
-        object_name="fk_user_id"
+        object_name="fk_user_id",
     )
     assert str(op) == "ADD FOREIGN KEY posts.fk_user_id"
 
@@ -93,7 +85,7 @@ def test_migration_operation_string_representation():
     op = MigrationOperation(
         operation_type=OperationType.DROP_FOREIGN_KEY,
         table_name="posts",
-        object_name="fk_user_id"
+        object_name="fk_user_id",
     )
     assert str(op) == "DROP FOREIGN KEY posts.fk_user_id"
 
@@ -113,7 +105,9 @@ def test_schema_differ_detect_changes_no_previous():
         TableSnapshot(
             name="users",
             columns=[
-                ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True),
+                ColumnSnapshot(
+                    name="id", type="INTEGER", nullable=False, primary_key=True
+                ),
                 ColumnSnapshot(name="name", type="VARCHAR(100)", nullable=True),
             ],
             indexes=[],
@@ -139,7 +133,9 @@ def test_schema_differ_detect_changes_no_changes():
         TableSnapshot(
             name="users",
             columns=[
-                ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True),
+                ColumnSnapshot(
+                    name="id", type="INTEGER", nullable=False, primary_key=True
+                ),
                 ColumnSnapshot(name="name", type="VARCHAR(100)", nullable=True),
             ],
             indexes=[],
@@ -167,7 +163,9 @@ def test_schema_differ_detect_table_creation():
         TableSnapshot(
             name="users",
             columns=[
-                ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True),
+                ColumnSnapshot(
+                    name="id", type="INTEGER", nullable=False, primary_key=True
+                ),
             ],
             indexes=[],
             foreign_keys=[],
@@ -191,7 +189,9 @@ def test_schema_differ_detect_table_deletion():
         TableSnapshot(
             name="users",
             columns=[
-                ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True),
+                ColumnSnapshot(
+                    name="id", type="INTEGER", nullable=False, primary_key=True
+                ),
             ],
             indexes=[],
             foreign_keys=[],
@@ -218,7 +218,9 @@ def test_schema_differ_detect_column_addition():
         TableSnapshot(
             name="users",
             columns=[
-                ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True),
+                ColumnSnapshot(
+                    name="id", type="INTEGER", nullable=False, primary_key=True
+                ),
             ],
             indexes=[],
             foreign_keys=[],
@@ -231,7 +233,9 @@ def test_schema_differ_detect_column_addition():
         TableSnapshot(
             name="users",
             columns=[
-                ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True),
+                ColumnSnapshot(
+                    name="id", type="INTEGER", nullable=False, primary_key=True
+                ),
                 ColumnSnapshot(name="email", type="VARCHAR(255)", nullable=True),
             ],
             indexes=[],
@@ -257,7 +261,9 @@ def test_schema_differ_detect_column_removal():
         TableSnapshot(
             name="users",
             columns=[
-                ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True),
+                ColumnSnapshot(
+                    name="id", type="INTEGER", nullable=False, primary_key=True
+                ),
                 ColumnSnapshot(name="email", type="VARCHAR(255)", nullable=True),
             ],
             indexes=[],
@@ -271,7 +277,9 @@ def test_schema_differ_detect_column_removal():
         TableSnapshot(
             name="users",
             columns=[
-                ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True),
+                ColumnSnapshot(
+                    name="id", type="INTEGER", nullable=False, primary_key=True
+                ),
             ],
             indexes=[],
             foreign_keys=[],
@@ -296,7 +304,9 @@ def test_schema_differ_detect_column_alteration():
         TableSnapshot(
             name="users",
             columns=[
-                ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True),
+                ColumnSnapshot(
+                    name="id", type="INTEGER", nullable=False, primary_key=True
+                ),
                 ColumnSnapshot(name="email", type="VARCHAR(100)", nullable=True),
             ],
             indexes=[],
@@ -310,8 +320,12 @@ def test_schema_differ_detect_column_alteration():
         TableSnapshot(
             name="users",
             columns=[
-                ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True),
-                ColumnSnapshot(name="email", type="VARCHAR(255)", nullable=False),  # Changed type and nullable
+                ColumnSnapshot(
+                    name="id", type="INTEGER", nullable=False, primary_key=True
+                ),
+                ColumnSnapshot(
+                    name="email", type="VARCHAR(255)", nullable=False
+                ),  # Changed type and nullable
             ],
             indexes=[],
             foreign_keys=[],
@@ -336,7 +350,9 @@ def test_schema_differ_detect_index_addition():
         TableSnapshot(
             name="users",
             columns=[
-                ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True),
+                ColumnSnapshot(
+                    name="id", type="INTEGER", nullable=False, primary_key=True
+                ),
                 ColumnSnapshot(name="email", type="VARCHAR(255)", nullable=True),
             ],
             indexes=[],
@@ -350,7 +366,9 @@ def test_schema_differ_detect_index_addition():
         TableSnapshot(
             name="users",
             columns=[
-                ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True),
+                ColumnSnapshot(
+                    name="id", type="INTEGER", nullable=False, primary_key=True
+                ),
                 ColumnSnapshot(name="email", type="VARCHAR(255)", nullable=True),
             ],
             indexes=[
@@ -378,7 +396,9 @@ def test_schema_differ_detect_index_removal():
         TableSnapshot(
             name="users",
             columns=[
-                ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True),
+                ColumnSnapshot(
+                    name="id", type="INTEGER", nullable=False, primary_key=True
+                ),
                 ColumnSnapshot(name="email", type="VARCHAR(255)", nullable=True),
             ],
             indexes=[
@@ -394,7 +414,9 @@ def test_schema_differ_detect_index_removal():
         TableSnapshot(
             name="users",
             columns=[
-                ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True),
+                ColumnSnapshot(
+                    name="id", type="INTEGER", nullable=False, primary_key=True
+                ),
                 ColumnSnapshot(name="email", type="VARCHAR(255)", nullable=True),
             ],
             indexes=[],
@@ -420,7 +442,9 @@ def test_schema_differ_detect_foreign_key_addition():
         TableSnapshot(
             name="posts",
             columns=[
-                ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True),
+                ColumnSnapshot(
+                    name="id", type="INTEGER", nullable=False, primary_key=True
+                ),
                 ColumnSnapshot(name="user_id", type="INTEGER", nullable=True),
             ],
             indexes=[],
@@ -434,7 +458,9 @@ def test_schema_differ_detect_foreign_key_addition():
         TableSnapshot(
             name="posts",
             columns=[
-                ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True),
+                ColumnSnapshot(
+                    name="id", type="INTEGER", nullable=False, primary_key=True
+                ),
                 ColumnSnapshot(name="user_id", type="INTEGER", nullable=True),
             ],
             indexes=[],
@@ -467,7 +493,9 @@ def test_schema_differ_detect_foreign_key_removal():
         TableSnapshot(
             name="posts",
             columns=[
-                ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True),
+                ColumnSnapshot(
+                    name="id", type="INTEGER", nullable=False, primary_key=True
+                ),
                 ColumnSnapshot(name="user_id", type="INTEGER", nullable=True),
             ],
             indexes=[],
@@ -488,7 +516,9 @@ def test_schema_differ_detect_foreign_key_removal():
         TableSnapshot(
             name="posts",
             columns=[
-                ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True),
+                ColumnSnapshot(
+                    name="id", type="INTEGER", nullable=False, primary_key=True
+                ),
                 ColumnSnapshot(name="user_id", type="INTEGER", nullable=True),
             ],
             indexes=[],
@@ -514,7 +544,9 @@ def test_schema_differ_detect_multiple_changes():
         TableSnapshot(
             name="users",
             columns=[
-                ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True),
+                ColumnSnapshot(
+                    name="id", type="INTEGER", nullable=False, primary_key=True
+                ),
                 ColumnSnapshot(name="name", type="VARCHAR(100)", nullable=True),
             ],
             indexes=[],
@@ -528,19 +560,27 @@ def test_schema_differ_detect_multiple_changes():
         TableSnapshot(
             name="users",
             columns=[
-                ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True),
+                ColumnSnapshot(
+                    name="id", type="INTEGER", nullable=False, primary_key=True
+                ),
                 ColumnSnapshot(name="name", type="VARCHAR(100)", nullable=True),
-                ColumnSnapshot(name="email", type="VARCHAR(255)", nullable=True),  # New column
+                ColumnSnapshot(
+                    name="email", type="VARCHAR(255)", nullable=True
+                ),  # New column
             ],
             indexes=[
-                IndexSnapshot(name="idx_email", columns=["email"], unique=True),  # New index
+                IndexSnapshot(
+                    name="idx_email", columns=["email"], unique=True
+                ),  # New index
             ],
             foreign_keys=[],
         ),
         TableSnapshot(  # New table
             name="posts",
             columns=[
-                ColumnSnapshot(name="id", type="INTEGER", nullable=False, primary_key=True),
+                ColumnSnapshot(
+                    name="id", type="INTEGER", nullable=False, primary_key=True
+                ),
                 ColumnSnapshot(name="title", type="VARCHAR(200)", nullable=False),
                 ColumnSnapshot(name="user_id", type="INTEGER", nullable=True),
             ],

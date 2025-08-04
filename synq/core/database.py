@@ -1,6 +1,6 @@
 """Database connection and migration state management."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 
 from sqlalchemy import (
@@ -24,16 +24,18 @@ class DatabaseManager:
 
     def __init__(self, db_uri_or_config):
         # Handle both string URI and config object for backward compatibility
-        if hasattr(db_uri_or_config, 'db_uri'):
+        if hasattr(db_uri_or_config, "db_uri"):
             # It's a config object
             self.db_uri = db_uri_or_config.db_uri
+            self.config = db_uri_or_config
         else:
             # It's a string URI
             self.db_uri = db_uri_or_config
-        
+            self.config = None
+
         if not self.db_uri:
             raise ValueError("Database URI is required")
-            
+
         self.engine = create_engine(self.db_uri)
         self.SessionClass = sessionmaker(bind=self.engine)
 
@@ -44,7 +46,7 @@ class DatabaseManager:
             self.metadata,
             Column("id", Integer, primary_key=True),
             Column("filename", String(255), nullable=False, unique=True),
-            Column("applied_at", DateTime, default=datetime.utcnow),
+            Column("applied_at", DateTime, default=lambda: datetime.now(timezone.utc)),
         )
 
         self._ensure_migrations_table()
@@ -86,9 +88,9 @@ class DatabaseManager:
 
     def apply_migration(self, migration: PendingMigration) -> None:
         """Apply a single migration to the database."""
-        with self.SessionClass() as session:
-            try:
-                with session.begin():
+        with self.engine.connect() as conn:
+            with conn.begin() as trans:
+                try:
                     # Execute migration SQL statements
                     statements = [
                         stmt.strip() for stmt in migration.sql_content.split(";")
@@ -112,22 +114,25 @@ class DatabaseManager:
                             continue
 
                         # Execute the statement
-                        session.execute(text(clean_statement))
+                        conn.execute(text(clean_statement))
 
-                    # Record migration as applied using ORM
-                    session.execute(
+                    # Record migration as applied
+                    conn.execute(
                         self.migrations_table.insert().values(
-                            filename=migration.filename, applied_at=datetime.utcnow()
+                            filename=migration.filename,
+                            applied_at=datetime.now(timezone.utc),
                         )
                     )
 
-                    # Transaction will be committed automatically by context manager
+                    # Explicitly commit the transaction
+                    trans.commit()
 
-            except SQLAlchemyError as e:
-                # Transaction will be rolled back automatically
-                raise RuntimeError(
-                    f"Failed to apply migration {migration.filename}: {e}"
-                )
+                except Exception as e:
+                    # Explicitly rollback the transaction
+                    trans.rollback()
+                    raise RuntimeError(
+                        f"Failed to apply migration {migration.filename}: {e}"
+                    )
 
     def rollback(self) -> None:
         """Rollback current transaction (handled by context manager)."""
@@ -159,12 +164,26 @@ class DatabaseManager:
         except SQLAlchemyError as e:
             return {"connected": False, "error": str(e), "uri": self.db_uri}
 
-    def apply_pending_migrations(self) -> None:
+    def apply_pending_migrations(self, migration_manager=None) -> None:
         """Apply all pending migrations (for backward compatibility)."""
-        # This method requires a MigrationManager to get pending migrations
-        # For now, we'll provide a stub that does nothing
-        # In practice, this should be called from a higher-level context
-        pass
+        if migration_manager is None:
+            if self.config is not None:
+                # Create a migration manager if we have config
+                from synq.core.migration import MigrationManager
+
+                migration_manager = MigrationManager(self.config)
+            else:
+                # This method is expected to work without explicit migration_manager
+                # but we can't create one without knowing where migrations are
+                # This is a limitation of the API design - for now, do nothing
+                return
+
+        # Get pending migrations
+        pending_migrations = migration_manager.get_pending_migrations(self)
+
+        # Apply each migration
+        for migration in pending_migrations:
+            self.apply_migration(migration)
 
     def close(self) -> None:
         """Close database connection."""

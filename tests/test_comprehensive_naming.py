@@ -1,27 +1,23 @@
 """Comprehensive tests for migration naming functionality."""
 
-import pytest
-
 from synq.core.diff import MigrationOperation, OperationType
 from synq.core.naming import MigrationNamer, NamingContext, generate_migration_name
-from synq.core.snapshot import ColumnSnapshot, TableSnapshot
 
 
 def test_naming_context_creation():
     """Test creating a NamingContext."""
     operations = [
         MigrationOperation(
-            operation_type=OperationType.CREATE_TABLE,
-            table_name="users"
+            operation_type=OperationType.CREATE_TABLE, table_name="users"
         )
     ]
-    
+
     context = NamingContext(
         operations=operations,
         table_names={"users"},
-        operation_counts={OperationType.CREATE_TABLE: 1}
+        operation_counts={OperationType.CREATE_TABLE: 1},
     )
-    
+
     assert len(context.operations) == 1
     assert "users" in context.table_names
     assert context.operation_counts[OperationType.CREATE_TABLE] == 1
@@ -46,11 +42,10 @@ def test_migration_namer_single_table_creation():
     namer = MigrationNamer()
     operations = [
         MigrationOperation(
-            operation_type=OperationType.CREATE_TABLE,
-            table_name="users"
+            operation_type=OperationType.CREATE_TABLE, table_name="users"
         )
     ]
-    
+
     name = namer.generate_name(operations)
     assert "create" in name.lower()
     assert "users" in name.lower()
@@ -62,19 +57,16 @@ def test_migration_namer_multiple_table_creation():
     namer = MigrationNamer()
     operations = [
         MigrationOperation(
-            operation_type=OperationType.CREATE_TABLE,
-            table_name="users"
+            operation_type=OperationType.CREATE_TABLE, table_name="users"
         ),
         MigrationOperation(
-            operation_type=OperationType.CREATE_TABLE,
-            table_name="posts"
+            operation_type=OperationType.CREATE_TABLE, table_name="posts"
         ),
         MigrationOperation(
-            operation_type=OperationType.CREATE_TABLE,
-            table_name="comments"
-        )
+            operation_type=OperationType.CREATE_TABLE, table_name="comments"
+        ),
     ]
-    
+
     name = namer.generate_name(operations)
     assert "initial" in name.lower() or "migration" in name.lower()
 
@@ -86,10 +78,10 @@ def test_migration_namer_single_column_addition():
         MigrationOperation(
             operation_type=OperationType.ADD_COLUMN,
             table_name="users",
-            object_name="email"
+            object_name="email",
         )
     ]
-    
+
     name = namer.generate_name(operations)
     assert "add" in name.lower()
     assert "email" in name.lower()
@@ -103,10 +95,10 @@ def test_migration_namer_single_column_removal():
         MigrationOperation(
             operation_type=OperationType.DROP_COLUMN,
             table_name="users",
-            object_name="email"
+            object_name="email",
         )
     ]
-    
+
     name = namer.generate_name(operations)
     assert any(prefix in name.lower() for prefix in ["remove", "delete"])
     assert "email" in name.lower()
@@ -118,11 +110,10 @@ def test_migration_namer_table_deletion():
     namer = MigrationNamer()
     operations = [
         MigrationOperation(
-            operation_type=OperationType.DROP_TABLE,
-            table_name="old_table"
+            operation_type=OperationType.DROP_TABLE, table_name="old_table"
         )
     ]
-    
+
     name = namer.generate_name(operations)
     assert any(prefix in name.lower() for prefix in ["delete", "remove"])
     assert "old_table" in name.lower()
@@ -136,10 +127,10 @@ def test_migration_namer_index_creation():
         MigrationOperation(
             operation_type=OperationType.CREATE_INDEX,
             table_name="users",
-            object_name="idx_email"
+            object_name="idx_email",
         )
     ]
-    
+
     name = namer.generate_name(operations)
     assert "add" in name.lower()
     assert "idx_email" in name.lower() or "index" in name.lower()
@@ -153,10 +144,10 @@ def test_migration_namer_index_removal():
         MigrationOperation(
             operation_type=OperationType.DROP_INDEX,
             table_name="users",
-            object_name="idx_email"
+            object_name="idx_email",
         )
     ]
-    
+
     name = namer.generate_name(operations)
     assert any(prefix in name.lower() for prefix in ["remove", "delete"])
     assert "idx_email" in name.lower() or "index" in name.lower()
@@ -169,10 +160,10 @@ def test_migration_namer_foreign_key_addition():
         MigrationOperation(
             operation_type=OperationType.ADD_FOREIGN_KEY,
             table_name="posts",
-            object_name="fk_user_id"
+            object_name="fk_user_id",
         )
     ]
-    
+
     name = namer.generate_name(operations)
     assert "add" in name.lower()
     assert "fk_user_id" in name.lower() or "foreign" in name.lower()
@@ -186,10 +177,10 @@ def test_migration_namer_foreign_key_removal():
         MigrationOperation(
             operation_type=OperationType.DROP_FOREIGN_KEY,
             table_name="posts",
-            object_name="fk_user_id"
+            object_name="fk_user_id",
         )
     ]
-    
+
     name = namer.generate_name(operations)
     assert any(prefix in name.lower() for prefix in ["remove", "delete"])
     assert "fk_user_id" in name.lower() or "foreign" in name.lower()
@@ -202,10 +193,10 @@ def test_migration_namer_column_alteration():
         MigrationOperation(
             operation_type=OperationType.ALTER_COLUMN,
             table_name="users",
-            object_name="email"
+            object_name="email",
         )
     ]
-    
+
     name = namer.generate_name(operations)
     assert any(prefix in name.lower() for prefix in ["alter", "change"])
     assert "email" in name.lower()
@@ -219,20 +210,20 @@ def test_migration_namer_mixed_operations_single_table():
         MigrationOperation(
             operation_type=OperationType.ADD_COLUMN,
             table_name="users",
-            object_name="email"
+            object_name="email",
         ),
         MigrationOperation(
             operation_type=OperationType.CREATE_INDEX,
             table_name="users",
-            object_name="idx_email"
+            object_name="idx_email",
         ),
         MigrationOperation(
             operation_type=OperationType.ALTER_COLUMN,
             table_name="users",
-            object_name="name"
-        )
+            object_name="name",
+        ),
     ]
-    
+
     name = namer.generate_name(operations)
     assert "update" in name.lower()
     assert "users" in name.lower()
@@ -246,20 +237,20 @@ def test_migration_namer_mixed_operations_multiple_tables():
         MigrationOperation(
             operation_type=OperationType.ADD_COLUMN,
             table_name="users",
-            object_name="email"
+            object_name="email",
         ),
         MigrationOperation(
             operation_type=OperationType.CREATE_INDEX,
             table_name="posts",
-            object_name="idx_title"
+            object_name="idx_title",
         ),
         MigrationOperation(
             operation_type=OperationType.ALTER_COLUMN,
             table_name="comments",
-            object_name="content"
-        )
+            object_name="content",
+        ),
     ]
-    
+
     name = namer.generate_name(operations)
     assert "update" in name.lower()
     assert "schema" in name.lower()
@@ -272,20 +263,20 @@ def test_migration_namer_multiple_columns_single_table():
         MigrationOperation(
             operation_type=OperationType.ADD_COLUMN,
             table_name="users",
-            object_name="email"
+            object_name="email",
         ),
         MigrationOperation(
             operation_type=OperationType.ADD_COLUMN,
             table_name="users",
-            object_name="phone"
+            object_name="phone",
         ),
         MigrationOperation(
             operation_type=OperationType.ADD_COLUMN,
             table_name="users",
-            object_name="address"
-        )
+            object_name="address",
+        ),
     ]
-    
+
     name = namer.generate_name(operations)
     assert "add" in name.lower()
     assert "columns" in name.lower()
@@ -297,11 +288,10 @@ def test_migration_namer_sanitize_name():
     namer = MigrationNamer()
     operations = [
         MigrationOperation(
-            operation_type=OperationType.CREATE_TABLE,
-            table_name="user-profile_data"
+            operation_type=OperationType.CREATE_TABLE, table_name="user-profile_data"
         )
     ]
-    
+
     name = namer.generate_name(operations)
     # Should sanitize special characters
     assert "-" not in name
@@ -314,10 +304,10 @@ def test_migration_namer_long_table_names():
     operations = [
         MigrationOperation(
             operation_type=OperationType.CREATE_TABLE,
-            table_name="extremely_long_table_name_that_exceeds_normal_limits"
+            table_name="extremely_long_table_name_that_exceeds_normal_limits",
         )
     ]
-    
+
     name = namer.generate_name(operations)
     # Should generate a reasonable name
     assert len(name) < 100  # Reasonable limit
@@ -329,11 +319,10 @@ def test_generate_migration_name_function():
     """Test the standalone generate_migration_name function."""
     operations = [
         MigrationOperation(
-            operation_type=OperationType.CREATE_TABLE,
-            table_name="users"
+            operation_type=OperationType.CREATE_TABLE, table_name="users"
         )
     ]
-    
+
     name = generate_migration_name(operations)
     assert isinstance(name, str)
     assert len(name) > 0
@@ -344,16 +333,16 @@ def test_generate_migration_name_function():
 def test_migration_namer_edge_cases():
     """Test edge cases for migration naming."""
     namer = MigrationNamer()
-    
+
     # Test with None object_name
     operations = [
         MigrationOperation(
             operation_type=OperationType.CREATE_TABLE,
             table_name="users",
-            object_name=None
+            object_name=None,
         )
     ]
-    
+
     name = namer.generate_name(operations)
     assert isinstance(name, str)
     assert len(name) > 0
@@ -364,11 +353,10 @@ def test_migration_namer_case_insensitive():
     namer = MigrationNamer()
     operations = [
         MigrationOperation(
-            operation_type=OperationType.CREATE_TABLE,
-            table_name="UserProfiles"
+            operation_type=OperationType.CREATE_TABLE, table_name="UserProfiles"
         )
     ]
-    
+
     name = namer.generate_name(operations)
     assert "create" in name.lower()
     # Should handle mixed case table names
@@ -382,10 +370,10 @@ def test_migration_namer_numeric_names():
         MigrationOperation(
             operation_type=OperationType.ADD_COLUMN,
             table_name="table2",
-            object_name="field123"
+            object_name="field123",
         )
     ]
-    
+
     name = namer.generate_name(operations)
     assert "add" in name.lower()
     assert "field123" in name.lower()
@@ -396,12 +384,9 @@ def test_migration_namer_single_character_names():
     """Test handling of single character table/column names."""
     namer = MigrationNamer()
     operations = [
-        MigrationOperation(
-            operation_type=OperationType.CREATE_TABLE,
-            table_name="x"
-        )
+        MigrationOperation(operation_type=OperationType.CREATE_TABLE, table_name="x")
     ]
-    
+
     name = namer.generate_name(operations)
     assert "create" in name.lower()
     assert "x" in name.lower()
@@ -411,20 +396,19 @@ def test_migration_namer_single_character_names():
 def test_migration_namer_operation_priority():
     """Test that mixed operations generate schema update names."""
     namer = MigrationNamer()
-    
+
     # Mixed operations should generate "update_schema" type names
     operations = [
         MigrationOperation(
             operation_type=OperationType.ADD_COLUMN,
             table_name="existing_table",
-            object_name="new_column"
+            object_name="new_column",
         ),
         MigrationOperation(
-            operation_type=OperationType.CREATE_TABLE,
-            table_name="new_table"
-        )
+            operation_type=OperationType.CREATE_TABLE, table_name="new_table"
+        ),
     ]
-    
+
     name = namer.generate_name(operations)
     # Mixed operations typically generate update_schema names
     assert "update" in name.lower() and "schema" in name.lower()
@@ -435,15 +419,13 @@ def test_migration_namer_multiple_same_operations():
     namer = MigrationNamer()
     operations = [
         MigrationOperation(
-            operation_type=OperationType.DROP_TABLE,
-            table_name="old_table1"
+            operation_type=OperationType.DROP_TABLE, table_name="old_table1"
         ),
         MigrationOperation(
-            operation_type=OperationType.DROP_TABLE,
-            table_name="old_table2"
-        )
+            operation_type=OperationType.DROP_TABLE, table_name="old_table2"
+        ),
     ]
-    
+
     name = namer.generate_name(operations)
     assert any(prefix in name.lower() for prefix in ["delete", "remove"])
     assert "table" in name.lower()
@@ -452,26 +434,26 @@ def test_migration_namer_multiple_same_operations():
 def test_migration_namer_name_uniqueness():
     """Test that similar operations generate distinguishable names."""
     namer = MigrationNamer()
-    
+
     operations1 = [
         MigrationOperation(
             operation_type=OperationType.ADD_COLUMN,
             table_name="users",
-            object_name="email"
+            object_name="email",
         )
     ]
-    
+
     operations2 = [
         MigrationOperation(
             operation_type=OperationType.ADD_COLUMN,
             table_name="users",
-            object_name="phone"
+            object_name="phone",
         )
     ]
-    
+
     name1 = namer.generate_name(operations1)
     name2 = namer.generate_name(operations2)
-    
+
     # Names should be different because object names are different
     assert name1 != name2
     assert "email" in name1.lower()

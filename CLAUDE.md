@@ -42,7 +42,7 @@ make check-all
 
 # Format code
 make format
-# or: black synq/ tests/ examples/ && ruff check --fix synq/ tests/ examples/
+# or: ruff format synq/ tests/ examples/ && ruff check --fix synq/ tests/ examples/
 
 # Run linting only  
 make lint

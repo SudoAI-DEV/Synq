@@ -82,6 +82,5 @@ def import_from_string(import_name: str) -> Any:
     # If there's a colon, it's an object reference
     if ":" in import_name:
         return import_metadata_from_path(import_name)
-    else:
-        # Just import the module
-        return importlib.import_module(import_name)
+    # Just import the module
+    return importlib.import_module(import_name)
