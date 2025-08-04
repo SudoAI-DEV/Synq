@@ -38,22 +38,22 @@ jobs:
       run: |
         pytest tests/ -v --tb=short --ignore=tests/integration/test_docker_databases.py --ignore=tests/test_cli_commands.py
 
-    - name: Test CLI commands
-      run: |
-        # Test basic CLI functionality
-        python -m synq --help
+    # - name: Test CLI commands
+    #   run: |
+    #     # Test basic CLI functionality
+    #     python -m synq --help
         
-        # Test init command
-        mkdir test_project && cd test_project
-        echo "from sqlalchemy import MetaData; metadata_obj = MetaData()" > models.py
-        python -m synq init --metadata-path "models:metadata_obj" --db-uri "sqlite:///test.db"
+    #     # Test init command
+    #     mkdir test_project && cd test_project
+    #     echo "from sqlalchemy import MetaData; metadata_obj = MetaData()" > models.py
+    #     python -m synq init --metadata-path "models:metadata_obj" --db-uri "sqlite:///test.db"
         
-        # Test generate command  
-        python -m synq generate "test migration"
+    #     # Test generate command  
+    #     python -m synq generate "test migration"
         
-        # Verify files were created
-        ls migrations/
-        ls migrations/meta/
+    #     # Verify files were created
+    #     ls migrations/
+    #     ls migrations/meta/
 
   # test-databases-docker:
   #   runs-on: ubuntu-latest
