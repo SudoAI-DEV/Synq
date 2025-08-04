@@ -53,7 +53,7 @@ def init(
 @click.option(
     "--config",
     "-c",
-    type=click.Path(exists=True, path_type=Path),
+    type=click.Path(exists=True),
     help="Path to synq.toml configuration file",
 )
 @click.option(
@@ -81,7 +81,7 @@ def generate(
 @click.option(
     "--config",
     "-c",
-    type=click.Path(exists=True, path_type=Path),
+    type=click.Path(exists=True),
     help="Path to synq.toml configuration file",
 )
 @click.option(
@@ -104,7 +104,7 @@ def migrate(config: Optional[Path], dry_run: bool, yes: bool) -> None:
 @click.option(
     "--config",
     "-c",
-    type=click.Path(exists=True, path_type=Path),
+    type=click.Path(exists=True),
     help="Path to synq.toml configuration file",
 )
 def status(config: Optional[Path]) -> None:

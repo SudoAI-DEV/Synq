@@ -32,7 +32,7 @@ class MigrationNamer:
         OperationType.DROP_FOREIGN_KEY: ["remove", "delete"],
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     def generate_name(self, operations: list[MigrationOperation]) -> str:
@@ -72,7 +72,7 @@ class MigrationNamer:
     ) -> NamingContext:
         """Analyze operations to extract naming context."""
         table_names = set()
-        operation_counts = {}
+        operation_counts: dict[OperationType, int] = {}
 
         for op in operations:
             table_names.add(op.table_name)

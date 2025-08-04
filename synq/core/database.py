@@ -1,6 +1,10 @@
 """Database connection and migration state management."""
 
 from datetime import datetime, timezone
+from typing import TYPE_CHECKING, Any, Optional, Union
+
+if TYPE_CHECKING:
+    pass
 
 from sqlalchemy import (
     Column,
@@ -12,6 +16,7 @@ from sqlalchemy import (
     create_engine,
     text,
 )
+from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 
@@ -21,7 +26,7 @@ from synq.core.migration import PendingMigration
 class DatabaseManager:
     """Manages database connections and migration state."""
 
-    def __init__(self, db_uri_or_config):
+    def __init__(self, db_uri_or_config: Union[str, Any]) -> None:
         # Handle both string URI and config object for backward compatibility
         if hasattr(db_uri_or_config, "db_uri"):
             # It's a config object
@@ -35,12 +40,12 @@ class DatabaseManager:
         if not self.db_uri:
             raise ValueError("Database URI is required")
 
-        self.engine = create_engine(self.db_uri)
+        self.engine: Engine = create_engine(self.db_uri)
         self.SessionClass = sessionmaker(bind=self.engine)
 
         # Define migrations table using SQLAlchemy ORM
-        self.metadata = MetaData()
-        self.migrations_table = Table(
+        self.metadata: MetaData = MetaData()
+        self.migrations_table: Table = Table(
             "synq_migrations",
             self.metadata,
             Column("id", Integer, primary_key=True),
@@ -146,7 +151,7 @@ class DatabaseManager:
         except SQLAlchemyError:
             return False
 
-    def get_database_info(self) -> dict:
+    def get_database_info(self) -> dict[str, Any]:
         """Get database information."""
         try:
             with self.engine.connect() as conn:
@@ -162,14 +167,19 @@ class DatabaseManager:
         except SQLAlchemyError as e:
             return {"connected": False, "error": str(e), "uri": self.db_uri}
 
-    def apply_pending_migrations(self, migration_manager=None) -> None:
+    def apply_pending_migrations(self, migration_manager: Optional[Any] = None) -> None:
         """Apply all pending migrations (for backward compatibility)."""
         if migration_manager is None:
-            if self.config is not None:
+            if self.config is not None and hasattr(self.config, "migrations_dir"):
                 # Create a migration manager if we have config
+                from synq.core.config import SynqConfig
                 from synq.core.migration import MigrationManager
 
-                migration_manager = MigrationManager(self.config)
+                # Type guard to ensure config is SynqConfig
+                if isinstance(self.config, SynqConfig):
+                    migration_manager = MigrationManager(self.config)
+                else:
+                    return
             else:
                 # This method is expected to work without explicit migration_manager
                 # but we can't create one without knowing where migrations are

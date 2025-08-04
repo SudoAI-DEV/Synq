@@ -57,8 +57,8 @@ def status_command(config_path: Optional[Path]) -> None:
 
             if pending_migrations:
                 click.echo("\n⏳ Pending migrations:")
-                for migration in pending_migrations:
-                    click.echo(f"  • {migration.filename}")
+                for pending_migration in pending_migrations:
+                    click.echo(f"  • {pending_migration.filename}")
                 click.echo("\nRun 'synq migrate' to apply pending migrations.")
             else:
                 click.echo("\n🎉 Database is up to date!")
@@ -66,8 +66,8 @@ def status_command(config_path: Optional[Path]) -> None:
         except Exception as e:
             click.echo(f"⚠️  Could not connect to database: {e}")
             click.echo("Showing local migrations only:")
-            for migration in all_migrations:
-                click.echo(f"  📄 {migration.filename}")
+            for migration_file in all_migrations:
+                click.echo(f"  📄 {migration_file.filename}")
 
     except Exception as e:
         click.echo(f"❌ Error checking status: {e}", err=True)

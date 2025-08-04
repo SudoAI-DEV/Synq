@@ -87,7 +87,7 @@ class SchemaSnapshot:
 
         return cls(tables=tables, version=data.get("version", "1.0"))
 
-    def __getitem__(self, key: str):
+    def __getitem__(self, key: str) -> Any:
         """Allow dictionary-style access for backward compatibility."""
         if key == "tables":
             # Return a dictionary with table names as keys
@@ -110,7 +110,7 @@ class SchemaSnapshot:
 class SnapshotManager:
     """Manages schema snapshots."""
 
-    def __init__(self, config):
+    def __init__(self, config: Any) -> None:
         self.config = config
         self.snapshot_path = config.snapshot_path
         self.snapshot_path.mkdir(parents=True, exist_ok=True)
@@ -133,11 +133,13 @@ class SnapshotManager:
             col_snapshot = ColumnSnapshot(
                 name=column.name,
                 type=str(column.type),
-                nullable=column.nullable,
+                nullable=bool(column.nullable),
                 default=str(column.default) if column.default else None,
                 primary_key=column.primary_key,
-                autoincrement=column.autoincrement,
-                unique=column.unique,
+                autoincrement=bool(column.autoincrement)
+                if isinstance(column.autoincrement, bool)
+                else False,
+                unique=bool(column.unique) if column.unique is not None else False,
             )
             columns.append(col_snapshot)
 
@@ -145,7 +147,7 @@ class SnapshotManager:
         indexes = []
         for index in table.indexes:
             idx_snapshot = IndexSnapshot(
-                name=index.name,
+                name=str(index.name) if index.name is not None else "",
                 columns=[col.name for col in index.columns],
                 unique=index.unique,
             )
@@ -155,7 +157,9 @@ class SnapshotManager:
         foreign_keys = []
         for fk in table.foreign_keys:
             fk_snapshot = ForeignKeySnapshot(
-                name=fk.constraint.name if fk.constraint else None,
+                name=str(fk.constraint.name)
+                if fk.constraint and fk.constraint.name
+                else None,
                 columns=[fk.parent.name],
                 referred_table=fk.column.table.name,
                 referred_columns=[fk.column.name],
@@ -180,7 +184,7 @@ class SnapshotManager:
         with open(filepath, "w") as f:
             json.dump(snapshot.to_dict(), f, indent=2)
 
-        return filepath
+        return Path(filepath)
 
     def load_snapshot(self, migration_number: int) -> Optional[SchemaSnapshot]:
         """Load a snapshot from file."""

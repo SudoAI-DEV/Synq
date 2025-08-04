@@ -3,15 +3,27 @@
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import NamedTuple, Optional
 
-from sqlalchemy import MetaData, create_engine
+# Forward declaration to avoid circular imports
+from typing import TYPE_CHECKING, Any, NamedTuple, Optional
+
+from sqlalchemy import MetaData, Table, create_engine
+from sqlalchemy.engine import Engine
 from sqlalchemy.schema import CreateTable
+from sqlalchemy.sql.type_api import TypeEngine
 
+from synq.core.config import SynqConfig
 from synq.core.diff import MigrationOperation, OperationType, SchemaDiffer
+from synq.core.snapshot import (
+    ColumnSnapshot,
+    ForeignKeySnapshot,
+    IndexSnapshot,
+    SchemaSnapshot,
+    TableSnapshot,
+)
 
-# from sqlalchemy.sql.ddl import DDLElement
-from synq.core.snapshot import SchemaSnapshot
+if TYPE_CHECKING:
+    from synq.core.database import DatabaseManager
 
 
 class MigrationFile(NamedTuple):
@@ -35,7 +47,7 @@ class PendingMigration:
 class MigrationManager:
     """Manages migration generation and application."""
 
-    def __init__(self, config):
+    def __init__(self, config: SynqConfig) -> None:
         self.config = config
         self.migrations_path = config.migrations_path
         self.migrations_path.mkdir(exist_ok=True)
@@ -86,7 +98,7 @@ class MigrationManager:
         return "\n".join(sql_statements)
 
     def _operation_to_sql(
-        self, operation: MigrationOperation, metadata: MetaData, engine
+        self, operation: MigrationOperation, metadata: MetaData, engine: Engine
     ) -> str:
         """Convert a single operation to SQL."""
 
@@ -101,6 +113,10 @@ class MigrationManager:
                     )
             else:
                 # Reconstruct SQLAlchemy table for DDL generation
+                if not isinstance(table_def, TableSnapshot):
+                    raise ValueError(
+                        f"Expected TableSnapshot for CREATE_TABLE operation, got {type(table_def)}"
+                    )
                 table = self._build_sqlalchemy_table(table_def, metadata)
             create_table = CreateTable(table)
             return str(create_table.compile(engine)).strip() + ";"
@@ -110,6 +126,10 @@ class MigrationManager:
 
         if operation.operation_type == OperationType.ADD_COLUMN:
             col_def = operation.new_definition
+            if not isinstance(col_def, ColumnSnapshot):
+                raise ValueError(
+                    f"Expected ColumnSnapshot for ADD_COLUMN operation, got {type(col_def)}"
+                )
             sql_type = col_def.type
 
             # Build column definition parts
@@ -132,6 +152,10 @@ class MigrationManager:
         if operation.operation_type == OperationType.ALTER_COLUMN:
             old_col = operation.old_definition
             new_col = operation.new_definition
+            if not isinstance(old_col, ColumnSnapshot) or not isinstance(
+                new_col, ColumnSnapshot
+            ):
+                raise ValueError("Expected ColumnSnapshot for ALTER_COLUMN operation")
 
             # For SQLite compatibility, we'll generate a comment
             # Real implementations would need database-specific syntax
@@ -144,6 +168,10 @@ class MigrationManager:
 
         if operation.operation_type == OperationType.CREATE_INDEX:
             idx_def = operation.new_definition
+            if not isinstance(idx_def, IndexSnapshot):
+                raise ValueError(
+                    f"Expected IndexSnapshot for CREATE_INDEX operation, got {type(idx_def)}"
+                )
             unique_clause = "UNIQUE " if idx_def.unique else ""
             columns = ", ".join(idx_def.columns)
             return f"CREATE {unique_clause}INDEX {idx_def.name} ON {operation.table_name} ({columns});"
@@ -153,6 +181,10 @@ class MigrationManager:
 
         if operation.operation_type == OperationType.ADD_FOREIGN_KEY:
             fk_def = operation.new_definition
+            if not isinstance(fk_def, ForeignKeySnapshot):
+                raise ValueError(
+                    f"Expected ForeignKeySnapshot for ADD_FOREIGN_KEY operation, got {type(fk_def)}"
+                )
             columns = ", ".join(fk_def.columns)
             ref_columns = ", ".join(fk_def.referred_columns)
 
@@ -174,21 +206,23 @@ class MigrationManager:
 
         return f"-- Unsupported operation: {operation.operation_type}"
 
-    def _build_sqlalchemy_table(self, table_def, metadata):
+    def _build_sqlalchemy_table(
+        self, table_def: TableSnapshot, metadata: MetaData
+    ) -> Table:
         """Build SQLAlchemy Table from TableSnapshot for DDL generation."""
-        from sqlalchemy import TIMESTAMP, Boolean, Column, Integer, String, Table, Text
+        from sqlalchemy import TIMESTAMP, Boolean, Column, Integer, String, Text
 
         # Create a new metadata instance to avoid conflicts
         temp_metadata = MetaData()
 
         # Simple type mapping - would need to be more comprehensive
-        type_mapping = {
-            "INTEGER": Integer,
-            "VARCHAR": String,
-            "TEXT": Text,
-            "BOOLEAN": Boolean,
-            "DATETIME": TIMESTAMP,  # Use TIMESTAMP for better database compatibility
-            "TIMESTAMP": TIMESTAMP,
+        type_mapping: dict[str, TypeEngine[Any]] = {
+            "INTEGER": Integer(),
+            "VARCHAR": String(),
+            "TEXT": Text(),
+            "BOOLEAN": Boolean(),
+            "DATETIME": TIMESTAMP(),  # Use TIMESTAMP for better database compatibility
+            "TIMESTAMP": TIMESTAMP(),
         }
 
         columns = []
@@ -197,14 +231,15 @@ class MigrationManager:
             col_type_str = col_def.type.upper()
 
             # Handle VARCHAR with length
+            col_type: TypeEngine[Any]
             if col_type_str.startswith("VARCHAR"):
                 if "(" in col_type_str:
                     length = int(col_type_str.split("(")[1].split(")")[0])
                     col_type = String(length)
                 else:
-                    col_type = String
+                    col_type = String()
             else:
-                col_type = type_mapping.get(col_type_str, String)
+                col_type = type_mapping.get(col_type_str, String())
 
             column = Column(
                 col_def.name,
@@ -291,7 +326,9 @@ class MigrationManager:
 
         return migration_files
 
-    def get_pending_migrations(self, db_manager) -> list[PendingMigration]:
+    def get_pending_migrations(
+        self, db_manager: "DatabaseManager"
+    ) -> list[PendingMigration]:
         """Get migrations that haven't been applied to the database."""
         all_migrations = self.get_all_migrations()
         applied_migrations = set(db_manager.get_applied_migrations())
@@ -372,7 +409,7 @@ class MigrationManager:
         except Exception:
             return False
 
-    def _parse_migration_filename(self, filename: str) -> tuple[int, str]:
+    def _parse_migration_filename(self, filename: str) -> Optional[tuple[int, str]]:
         """Parse migration filename to extract number and name."""
         stem = filename.removesuffix(".sql")
         parts = stem.split("_", 1)

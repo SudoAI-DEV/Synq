@@ -17,7 +17,7 @@ class SynqConfig:
     snapshot_dir: str = "migrations/meta"
 
     @classmethod
-    def from_file(cls, config_path: Path = None) -> "SynqConfig":
+    def from_file(cls, config_path: Optional[Path] = None) -> "SynqConfig":
         """Load configuration from synq.toml file."""
         if config_path is None:
             config_path = Path.cwd() / "synq.toml"
@@ -56,7 +56,7 @@ class SynqConfig:
 
         return {"synq": result}
 
-    def save_to_file(self, config_path: Path = None) -> None:
+    def save_to_file(self, config_path: Optional[Path] = None) -> None:
         """Save configuration to synq.toml file."""
         if config_path is None:
             config_path = Path.cwd() / "synq.toml"
