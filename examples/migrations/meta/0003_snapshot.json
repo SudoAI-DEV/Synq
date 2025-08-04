@@ -1,0 +1,243 @@
+{
+  "tables": [
+    {
+      "name": "users",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": null,
+          "primary_key": true,
+          "autoincrement": "auto",
+          "unique": null
+        },
+        {
+          "name": "username",
+          "type": "VARCHAR(50)",
+          "nullable": false,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": "auto",
+          "unique": true
+        },
+        {
+          "name": "email",
+          "type": "VARCHAR(100)",
+          "nullable": false,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": "auto",
+          "unique": true
+        },
+        {
+          "name": "is_active",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "default": "ScalarElementColumnDefault(True)",
+          "primary_key": false,
+          "autoincrement": "auto",
+          "unique": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": "auto",
+          "unique": null
+        }
+      ],
+      "indexes": [],
+      "foreign_keys": [],
+      "schema": null
+    },
+    {
+      "name": "posts",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": null,
+          "primary_key": true,
+          "autoincrement": "auto",
+          "unique": null
+        },
+        {
+          "name": "title",
+          "type": "VARCHAR(200)",
+          "nullable": false,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": "auto",
+          "unique": null
+        },
+        {
+          "name": "content",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": "auto",
+          "unique": null
+        },
+        {
+          "name": "author_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": "auto",
+          "unique": null
+        },
+        {
+          "name": "published",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "default": "ScalarElementColumnDefault(False)",
+          "primary_key": false,
+          "autoincrement": "auto",
+          "unique": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": "auto",
+          "unique": null
+        }
+      ],
+      "indexes": [],
+      "foreign_keys": [],
+      "schema": null
+    },
+    {
+      "name": "comments",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": null,
+          "primary_key": true,
+          "autoincrement": "auto",
+          "unique": null
+        },
+        {
+          "name": "content",
+          "type": "VARCHAR",
+          "nullable": false,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": "auto",
+          "unique": null
+        },
+        {
+          "name": "post_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": "auto",
+          "unique": null
+        },
+        {
+          "name": "author_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": "auto",
+          "unique": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": "auto",
+          "unique": null
+        }
+      ],
+      "indexes": [],
+      "foreign_keys": [],
+      "schema": null
+    },
+    {
+      "name": "categories",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": null,
+          "primary_key": true,
+          "autoincrement": "auto",
+          "unique": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(100)",
+          "nullable": false,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": "auto",
+          "unique": null
+        },
+        {
+          "name": "description",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": "auto",
+          "unique": null
+        }
+      ],
+      "indexes": [],
+      "foreign_keys": [],
+      "schema": null
+    },
+    {
+      "name": "tags",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": null,
+          "primary_key": true,
+          "autoincrement": "auto",
+          "unique": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(50)",
+          "nullable": false,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": "auto",
+          "unique": true
+        },
+        {
+          "name": "color",
+          "type": "VARCHAR(7)",
+          "nullable": true,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": "auto",
+          "unique": null
+        }
+      ],
+      "indexes": [],
+      "foreign_keys": [],
+      "schema": null
+    }
+  ],
+  "version": "1.0"
+}

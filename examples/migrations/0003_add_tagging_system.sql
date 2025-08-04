@@ -1,0 +1,8 @@
+-- CREATE TABLE tags
+CREATE TABLE tags (
+	id INTEGER NOT NULL, 
+	name VARCHAR(50) NOT NULL, 
+	color VARCHAR(7), 
+	PRIMARY KEY (id), 
+	UNIQUE (name)
+);

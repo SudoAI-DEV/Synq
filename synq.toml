@@ -1,0 +1,3 @@
+[synq]
+metadata_path = "test:metadata"
+db_uri = "sqlite:///test.db"

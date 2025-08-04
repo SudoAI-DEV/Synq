@@ -1,0 +1,222 @@
+"""Snapshot system for schema state management."""
+
+import json
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from sqlalchemy import MetaData, Table
+
+
+@dataclass
+class ColumnSnapshot:
+    """Snapshot of a column definition."""
+
+    name: str
+    type: str
+    nullable: bool
+    default: Optional[str] = None
+    primary_key: bool = False
+    autoincrement: bool = False
+    unique: bool = False
+
+
+@dataclass
+class IndexSnapshot:
+    """Snapshot of an index definition."""
+
+    name: str
+    columns: List[str]
+    unique: bool = False
+
+
+@dataclass
+class ForeignKeySnapshot:
+    """Snapshot of a foreign key constraint."""
+
+    name: Optional[str]
+    columns: List[str]
+    referred_table: str
+    referred_columns: List[str]
+    ondelete: Optional[str] = None
+    onupdate: Optional[str] = None
+
+
+@dataclass
+class TableSnapshot:
+    """Snapshot of a table definition."""
+
+    name: str
+    columns: List[ColumnSnapshot]
+    indexes: List[IndexSnapshot]
+    foreign_keys: List[ForeignKeySnapshot]
+    schema: Optional[str] = None
+
+
+@dataclass
+class SchemaSnapshot:
+    """Complete schema snapshot."""
+
+    tables: List[TableSnapshot]
+    version: str = "1.0"
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert snapshot to dictionary for JSON serialization."""
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "SchemaSnapshot":
+        """Create snapshot from dictionary."""
+        tables = []
+        for table_data in data["tables"]:
+            columns = [ColumnSnapshot(**col) for col in table_data["columns"]]
+            indexes = [IndexSnapshot(**idx) for idx in table_data["indexes"]]
+            foreign_keys = [
+                ForeignKeySnapshot(**fk) for fk in table_data["foreign_keys"]
+            ]
+
+            tables.append(
+                TableSnapshot(
+                    name=table_data["name"],
+                    columns=columns,
+                    indexes=indexes,
+                    foreign_keys=foreign_keys,
+                    schema=table_data.get("schema"),
+                )
+            )
+
+        return cls(tables=tables, version=data.get("version", "1.0"))
+
+
+class SnapshotManager:
+    """Manages schema snapshots."""
+
+    def __init__(self, config):
+        self.config = config
+        self.snapshot_path = config.snapshot_path
+        self.snapshot_path.mkdir(parents=True, exist_ok=True)
+
+    def create_snapshot(self, metadata: MetaData) -> SchemaSnapshot:
+        """Create a snapshot from SQLAlchemy MetaData."""
+        tables = []
+
+        for table in metadata.tables.values():
+            table_snapshot = self._create_table_snapshot(table)
+            tables.append(table_snapshot)
+
+        return SchemaSnapshot(tables=tables)
+
+    def _create_table_snapshot(self, table: Table) -> TableSnapshot:
+        """Create a snapshot of a single table."""
+        # Extract columns
+        columns = []
+        for column in table.columns:
+            col_snapshot = ColumnSnapshot(
+                name=column.name,
+                type=str(column.type),
+                nullable=column.nullable,
+                default=str(column.default) if column.default else None,
+                primary_key=column.primary_key,
+                autoincrement=column.autoincrement,
+                unique=column.unique,
+            )
+            columns.append(col_snapshot)
+
+        # Extract indexes
+        indexes = []
+        for index in table.indexes:
+            idx_snapshot = IndexSnapshot(
+                name=index.name,
+                columns=[col.name for col in index.columns],
+                unique=index.unique,
+            )
+            indexes.append(idx_snapshot)
+
+        # Extract foreign keys
+        foreign_keys = []
+        for fk in table.foreign_keys:
+            fk_snapshot = ForeignKeySnapshot(
+                name=fk.constraint.name if fk.constraint else None,
+                columns=[fk.parent.name],
+                referred_table=fk.column.table.name,
+                referred_columns=[fk.column.name],
+                ondelete=fk.ondelete,
+                onupdate=fk.onupdate,
+            )
+            foreign_keys.append(fk_snapshot)
+
+        return TableSnapshot(
+            name=table.name,
+            columns=columns,
+            indexes=indexes,
+            foreign_keys=foreign_keys,
+            schema=table.schema,
+        )
+
+    def save_snapshot(self, migration_number: int, snapshot: SchemaSnapshot) -> Path:
+        """Save a snapshot to file."""
+        filename = f"{migration_number:04d}_snapshot.json"
+        filepath = self.snapshot_path / filename
+
+        with open(filepath, "w") as f:
+            json.dump(snapshot.to_dict(), f, indent=2)
+
+        return filepath
+
+    def load_snapshot(self, migration_number: int) -> Optional[SchemaSnapshot]:
+        """Load a snapshot from file."""
+        filename = f"{migration_number:04d}_snapshot.json"
+        filepath = self.snapshot_path / filename
+
+        if not filepath.exists():
+            return None
+
+        with open(filepath) as f:
+            data = json.load(f)
+
+        return SchemaSnapshot.from_dict(data)
+
+    def get_latest_snapshot(self) -> Optional[SchemaSnapshot]:
+        """Get the most recent snapshot."""
+        snapshot_files = list(self.snapshot_path.glob("*_snapshot.json"))
+
+        if not snapshot_files:
+            return None
+
+        # Sort by migration number (filename prefix)
+        latest_file = sorted(snapshot_files)[-1]
+        migration_number = int(latest_file.stem.split("_")[0])
+
+        return self.load_snapshot(migration_number)
+
+    def get_next_migration_number(self) -> int:
+        """Get the next migration number."""
+        snapshot_files = list(self.snapshot_path.glob("*_snapshot.json"))
+
+        if not snapshot_files:
+            return 0
+
+        # Get highest migration number
+        max_number = 0
+        for file in snapshot_files:
+            try:
+                number = int(file.stem.split("_")[0])
+                max_number = max(max_number, number)
+            except ValueError:
+                continue
+
+        return max_number + 1
+
+    def get_all_snapshots(self) -> List[int]:
+        """Get all available snapshot numbers."""
+        snapshot_files = list(self.snapshot_path.glob("*_snapshot.json"))
+        numbers = []
+
+        for file in snapshot_files:
+            try:
+                number = int(file.stem.split("_")[0])
+                numbers.append(number)
+            except ValueError:
+                continue
+
+        return sorted(numbers)
