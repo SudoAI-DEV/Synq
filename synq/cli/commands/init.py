@@ -6,6 +6,7 @@ from typing import Optional
 import click
 
 from synq.core.config import SynqConfig
+from synq.utils.output import format_error, format_success, safe_echo
 
 
 def init_command(
@@ -42,10 +43,10 @@ def init_command(
         # Save configuration
         config.save_to_file(config_path)
 
-        click.echo(f"✅ Initialized Synq in {Path.cwd()}")
-        click.echo(f"📁 Created migrations directory: {migrations_path}")
-        click.echo(f"📁 Created snapshots directory: {snapshot_path}")
-        click.echo(f"⚙️  Created configuration file: {config_path}")
+        click.echo(format_success(f"Initialized Synq in {Path.cwd()}"))
+        click.echo(safe_echo(f"📁 Created migrations directory: {migrations_path}"))
+        click.echo(safe_echo(f"📁 Created snapshots directory: {snapshot_path}"))
+        click.echo(safe_echo(f"⚙️  Created configuration file: {config_path}"))
         click.echo("")
         click.echo("Next steps:")
         click.echo("1. Define your SQLAlchemy models")
@@ -54,5 +55,5 @@ def init_command(
         )
 
     except Exception as e:
-        click.echo(f"❌ Error initializing Synq: {e}", err=True)
+        click.echo(format_error(f"Error initializing Synq: {e}"), err=True)
         raise click.Abort() from e

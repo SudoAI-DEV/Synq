@@ -27,6 +27,7 @@ repos:
           - types-toml
           - types-click
         exclude: ^tests/
+        stages: [manual]
 
   - repo: https://github.com/pycqa/bandit
     rev: 1.7.5
@@ -53,3 +54,12 @@ repos:
         pass_filenames: false
         always_run: false
         args: [tests/, --cov=synq, --cov-report=term-missing, --cov-fail-under=80]
+
+      - id: lint-and-test-pre-push
+        name: Lint and test before push
+        entry: bash
+        language: system
+        stages: [pre-push]
+        pass_filenames: false
+        always_run: true
+        args: [-c, 'ruff check synq/ examples/ && pytest tests/ -v']
