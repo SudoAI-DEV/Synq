@@ -140,31 +140,33 @@ class MigrationNamer:
         counts = context.operation_counts
 
         # Check for common patterns
-        if counts.get(OperationType.ADD_COLUMN, 0) > 0:
-            if len(context.operations) == counts.get(OperationType.ADD_COLUMN, 0):
-                # Only column additions
-                if counts[OperationType.ADD_COLUMN] == 1:
-                    op = next(
-                        op
-                        for op in context.operations
-                        if op.operation_type == OperationType.ADD_COLUMN
-                    )
-                    column_name = self._sanitize_name(op.object_name or "column")
-                    return f"add_{column_name}_to_{table_name}"
-                return f"add_columns_to_{table_name}"
+        if counts.get(OperationType.ADD_COLUMN, 0) > 0 and len(
+            context.operations
+        ) == counts.get(OperationType.ADD_COLUMN, 0):
+            # Only column additions
+            if counts[OperationType.ADD_COLUMN] == 1:
+                op = next(
+                    op
+                    for op in context.operations
+                    if op.operation_type == OperationType.ADD_COLUMN
+                )
+                column_name = self._sanitize_name(op.object_name or "column")
+                return f"add_{column_name}_to_{table_name}"
+            return f"add_columns_to_{table_name}"
 
-        if counts.get(OperationType.DROP_COLUMN, 0) > 0:
-            if len(context.operations) == counts.get(OperationType.DROP_COLUMN, 0):
-                # Only column removals
-                if counts[OperationType.DROP_COLUMN] == 1:
-                    op = next(
-                        op
-                        for op in context.operations
-                        if op.operation_type == OperationType.DROP_COLUMN
-                    )
-                    column_name = self._sanitize_name(op.object_name or "column")
-                    return f"remove_{column_name}_from_{table_name}"
-                return f"remove_columns_from_{table_name}"
+        if counts.get(OperationType.DROP_COLUMN, 0) > 0 and len(
+            context.operations
+        ) == counts.get(OperationType.DROP_COLUMN, 0):
+            # Only column removals
+            if counts[OperationType.DROP_COLUMN] == 1:
+                op = next(
+                    op
+                    for op in context.operations
+                    if op.operation_type == OperationType.DROP_COLUMN
+                )
+                column_name = self._sanitize_name(op.object_name or "column")
+                return f"remove_{column_name}_from_{table_name}"
+            return f"remove_columns_from_{table_name}"
 
         # Mixed operations
         return f"update_{table_name}_schema"

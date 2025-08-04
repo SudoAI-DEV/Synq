@@ -55,14 +55,14 @@ class DatabaseManager:
         try:
             # Create the table if it doesn't exist
             self.metadata.create_all(self.engine, tables=[self.migrations_table])
-        except SQLAlchemyError as e:
+        except SQLAlchemyError:
             # If creation fails, the table might already exist
             # Try to verify by querying it
             try:
                 with self.engine.connect() as conn:
                     conn.execute(self.migrations_table.select().limit(1))
-            except SQLAlchemyError:
-                raise RuntimeError(f"Failed to create or access migrations table: {e}")
+            except SQLAlchemyError as exc:
+                raise RuntimeError(f"Failed to create or access migrations table: {exc}") from exc
 
     def ensure_migrations_table(self) -> None:
         """Public method to ensure the migrations tracking table exists."""
@@ -83,12 +83,11 @@ class DatabaseManager:
                 )
                 return [row.filename for row in result.fetchall()]
         except SQLAlchemyError as e:
-            raise RuntimeError(f"Failed to query applied migrations: {e}")
+            raise RuntimeError(f"Failed to query applied migrations: {e}") from e
 
     def apply_migration(self, migration: PendingMigration) -> None:
         """Apply a single migration to the database."""
-        with self.engine.connect() as conn:
-            with conn.begin() as trans:
+        with self.engine.connect() as conn, conn.begin() as trans:
                 try:
                     # Execute migration SQL statements
                     statements = [
@@ -131,7 +130,7 @@ class DatabaseManager:
                     trans.rollback()
                     raise RuntimeError(
                         f"Failed to apply migration {migration.filename}: {e}"
-                    )
+                    ) from e
 
     def rollback(self) -> None:
         """Rollback current transaction (handled by context manager)."""
